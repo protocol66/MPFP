@@ -1,0 +1,130 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/jon/Github/ENN/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/p5.9.20220828.0/
+ASCII2NUM	include/common.h	/^uint8_t ASCII2NUM(uint8_t u8_ascii) {$/;"	f	typeref:typename:__STATIC_INLINE uint8_t
+BUTTON_PIN	include/gpio.h	/^#define BUTTON_PIN /;"	d
+BUTTON_PIN	include/uart.h	/^#define BUTTON_PIN /;"	d
+BUTTON_PORT	include/gpio.h	/^#define BUTTON_PORT /;"	d
+BUTTON_PORT	include/uart.h	/^#define BUTTON_PORT /;"	d
+CLEAR_GPIO_PIN	include/gpio.h	/^void CLEAR_GPIO_PIN(const GPIO gpio)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+CLOCK_H	include/clock.h	/^#define CLOCK_H$/;"	d
+COL0	include/keypad.h	/^const GPIO COL0 = { .pst_port = GPIOB,$/;"	v	typeref:typename:const GPIO
+COL1	include/keypad.h	/^const GPIO COL1 = { .pst_port = GPIOB,$/;"	v	typeref:typename:const GPIO
+COL2	include/keypad.h	/^const GPIO COL2 = { .pst_port = GPIOB,$/;"	v	typeref:typename:const GPIO
+COL3	include/keypad.h	/^const GPIO COL3 = { .pst_port = GPIOA,$/;"	v	typeref:typename:const GPIO
+COMMON_H	include/common.h	/^#define COMMON_H$/;"	d
+DELAY_DIV	include/common.h	/^#define DELAY_DIV /;"	d
+DELAY_MS	include/common.h	/^void DELAY_MS(uint32_t u32_ms)	{$/;"	f	typeref:typename:void
+DELAY_US	include/common.h	/^void DELAY_US(uint32_t u32_us)	{$/;"	f	typeref:typename:void
+EMPTY	include/common.h	/^	EMPTY,$/;"	e	enum:__anon84d717570103
+FULL	include/common.h	/^	FULL,$/;"	e	enum:__anon84d717570103
+GPIO	include/gpio.h	/^} GPIO;$/;"	t	typeref:struct:__anon4f91665d0108
+GPIO_DELAY	include/keypad.h	/^#define GPIO_DELAY /;"	d
+GPIO_H	include/gpio.h	/^#define GPIO_H$/;"	d
+GPIO_INPUT_DEFAULT	include/gpio.h	/^#define GPIO_INPUT_DEFAULT(/;"	d
+GPIO_OUTPUT_DEFAULT	include/gpio.h	/^#define GPIO_OUTPUT_DEFAULT(/;"	d
+INF_LOOP	include/common.h	/^#define INF_LOOP(/;"	d
+IS_ANY_KEY_PRESSED	include/keypad.h	/^int IS_ANY_KEY_PRESSED(void)   {$/;"	f	typeref:typename:__STATIC_INLINE int
+IS_B1_PRESSED	include/gpio.h	/^int IS_B1_PRESSED(void)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+IS_B1_RELEASED	include/gpio.h	/^int IS_B1_RELEASED(void)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+IS_LD2_OFF	include/gpio.h	/^int IS_LD2_OFF(void)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+IS_LD2_ON	include/gpio.h	/^int IS_LD2_ON(void)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+J_UTILS_H	include/lib.h	/^#define J_UTILS_H$/;"	d
+KEYPAD_H	include/keypad.h	/^#define KEYPAD_H$/;"	d
+KEY_MAP	include/keypad.h	/^const char KEY_MAP[4][4] = {$/;"	v	typeref:typename:const char[4][4]
+LED_PIN	include/gpio.h	/^#define LED_PIN /;"	d
+LED_PORT	include/gpio.h	/^#define LED_PORT /;"	d
+MEMCOPY	include/common.h	/^void MEMCOPY(uint8_t *pu8_dest, uint8_t *pu8_src, uint32_t u32_len) {$/;"	f	typeref:typename:__STATIC_INLINE void
+NONE	include/common.h	/^	NONE = 0,$/;"	e	enum:__anon84d717570103
+NULL	include/common.h	/^	#define NULL /;"	d
+NUM2ASCII	include/common.h	/^uint8_t NUM2ASCII(uint8_t u8_num) {$/;"	f	typeref:typename:__STATIC_INLINE uint8_t
+PRIVATE	include/common.h	/^	#define PRIVATE /;"	d
+READ_GPIO_PIN	include/gpio.h	/^int READ_GPIO_PIN(const GPIO gpio)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+RESET_KEYPAD	include/keypad.h	/^void RESET_KEYPAD(void) {$/;"	f	typeref:typename:__STATIC_INLINE void
+ROW0	include/keypad.h	/^const GPIO ROW0 = { .pst_port = GPIOC, $/;"	v	typeref:typename:const GPIO
+ROW1	include/keypad.h	/^const GPIO ROW1 = { .pst_port = GPIOA,$/;"	v	typeref:typename:const GPIO
+ROW2	include/keypad.h	/^const GPIO ROW2 = { .pst_port = GPIOA,$/;"	v	typeref:typename:const GPIO
+ROW3	include/keypad.h	/^const GPIO ROW3 = { .pst_port = GPIOB,$/;"	v	typeref:typename:const GPIO
+SETUP_BUTTON	include/gpio.h	/^void SETUP_BUTTON(void)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+SETUP_KEYPAD	include/keypad.h	/^void SETUP_KEYPAD(void)     {$/;"	f	typeref:typename:void
+SETUP_LD2	include/gpio.h	/^void SETUP_LD2(void)$/;"	f	typeref:typename:__STATIC_INLINE void
+SETUP_USART2	include/uart.h	/^void SETUP_USART2(uint32_t u32_baudrate)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+SET_GPIO_PIN	include/gpio.h	/^void SET_GPIO_PIN(const GPIO gpio)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+STATUS	include/common.h	/^} STATUS;$/;"	t	typeref:enum:__anon84d717570103
+TIMER_H	include/timer.h	/^#define TIMER_H$/;"	d
+TOGGLE_LD2	include/gpio.h	/^void TOGGLE_LD2(void)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+TURN_OFF_LD2	include/gpio.h	/^void TURN_OFF_LD2(void)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+TURN_ON_LD2	include/gpio.h	/^void TURN_ON_LD2(void)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+UART_H	include/uart.h	/^#define UART_H$/;"	d
+USART	include/uart.h	/^} USART;$/;"	t	typeref:struct:__anon6f2f344a0108
+USART2_CLEAR_RX_BUFFER	include/uart.h	/^void USART2_CLEAR_RX_BUFFER(void)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+USART2_RECEIVE_STRING	include/uart.h	/^uint32_t USART2_RECEIVE_STRING(char *car_string, uint32_t u32_max_length)	{$/;"	f	typeref:typename:__STATIC_INLINE uint32_t
+USART2_RX_AF	include/uart.h	/^#define USART2_RX_AF /;"	d
+USART2_RX_PIN	include/uart.h	/^#define USART2_RX_PIN /;"	d
+USART2_RX_PORT	include/uart.h	/^#define USART2_RX_PORT /;"	d
+USART2_SEND_STRING	include/uart.h	/^void USART2_SEND_STRING(const char *car_string)	{$/;"	f	typeref:typename:__STATIC_INLINE void
+USART2_TX_AF	include/uart.h	/^#define USART2_TX_AF /;"	d
+USART2_TX_PIN	include/uart.h	/^#define USART2_TX_PIN /;"	d
+USART2_TX_PORT	include/uart.h	/^#define USART2_TX_PORT /;"	d
+__GET_KEY_COLUMN	include/keypad.h	/^int __GET_KEY_COLUMN(void)    {$/;"	f	typeref:typename:__STATIC_INLINE int
+__GET_KEY_ROW	include/keypad.h	/^int __GET_KEY_ROW(void)   {$/;"	f	typeref:typename:__STATIC_INLINE int
+__INT_TO_TIM	include/timer.h	/^TIM_TypeDef* __INT_TO_TIM(uint32_t u32_timer_sel)	{$/;"	f	typeref:typename:__STATIC_INLINE TIM_TypeDef *
+__INT_TO_TIM_CHAN	include/timer.h	/^uint32_t __INT_TO_TIM_CHAN(uint32_t u32_channel)	{$/;"	f	typeref:typename:__STATIC_INLINE uint32_t
+__IS_TIM_32BIT	include/timer.h	/^int __IS_TIM_32BIT(TIM_TypeDef* pst_timer)	{$/;"	f	typeref:typename:__STATIC_INLINE int
+__SELECT_COLUMN	include/keypad.h	/^void __SELECT_COLUMN(GPIO st_col)   {$/;"	f	typeref:typename:__STATIC_INLINE void
+__STATIC_INLINE	include/common.h	/^  #define __STATIC_INLINE /;"	d
+__anon4f91665d0108	include/gpio.h	/^typedef struct {$/;"	s
+__anon6f2f344a0108	include/uart.h	/^typedef struct {$/;"	s
+__anon84d717570103	include/common.h	/^typedef enum {$/;"	g
+fn_clear_rx_buffer	include/uart.h	/^void fn_clear_rx_buffer(USART *pst_usart)	{$/;"	f	typeref:typename:void
+fn_delay_loop	include/common.h	/^void fn_delay_loop(uint64_t loops)$/;"	f	typeref:typename:void
+fn_get_char	include/uart.h	/^char fn_get_char(USART *pst_usart)	{		$/;"	f	typeref:typename:char
+fn_get_key	include/keypad.h	/^char fn_get_key(void)   {$/;"	f	typeref:typename:char
+fn_receive_string	include/uart.h	/^uint32_t fn_receive_string(USART *pst_usart, char *car_string, uint32_t u32_buff_size)	{$/;"	f	typeref:typename:uint32_t
+fn_send_char	include/uart.h	/^void fn_send_char(USART *pst_usart, char car_char)	{$/;"	f	typeref:typename:void
+fn_send_string	include/uart.h	/^void fn_send_string(USART *pst_usart, const char *car_string)	{$/;"	f	typeref:typename:void
+fn_set_timer_channel_output	include/timer.h	/^int fn_set_timer_channel_output(uint32_t u32_timer, uint32_t u32_channel)	{$/;"	f	typeref:typename:int
+fn_set_timer_duty	include/timer.h	/^void fn_set_timer_duty(uint32_t u32_timer, uint32_t u32_duty, uint32_t u32_channel)  {$/;"	f	typeref:typename:void
+fn_set_timer_hz	include/timer.h	/^void fn_set_timer_hz(uint32_t u32_timer, uint32_t u32_hz)  {$/;"	f	typeref:typename:void
+fn_set_timer_ms	include/timer.h	/^void fn_set_timer_ms(uint32_t u32_timer, uint32_t u32_us)  {$/;"	f	typeref:typename:void
+fn_set_timer_sec	include/timer.h	/^void fn_set_timer_sec(uint32_t u32_timer, uint32_t u32_sec)  {$/;"	f	typeref:typename:void
+fn_set_timer_us	include/timer.h	/^void fn_set_timer_us(uint32_t u32_timer, uint32_t u32_us)  {$/;"	f	typeref:typename:void
+fn_setup_gpio	include/gpio.h	/^void fn_setup_gpio(const GPIO *gpio)	{$/;"	f	typeref:typename:void
+fn_setup_timer_output	include/timer.h	/^void fn_setup_timer_output(uint32_t u32_timer)  {$/;"	f	typeref:typename:void
+fn_setup_usart	include/uart.h	/^void fn_setup_usart(USART *usart)	{$/;"	f	typeref:typename:void
+g_st_button	include/gpio.h	/^GPIO g_st_button;$/;"	v	typeref:typename:GPIO
+g_st_led	include/gpio.h	/^GPIO g_st_led;$/;"	v	typeref:typename:GPIO
+g_st_usart2	include/uart.h	/^USART g_st_usart2;$/;"	v	typeref:typename:USART
+g_st_usart2_rx_gpio	include/uart.h	/^GPIO g_st_usart2_rx_gpio;$/;"	v	typeref:typename:GPIO
+g_st_usart2_tx_gpio	include/uart.h	/^GPIO g_st_usart2_tx_gpio;$/;"	v	typeref:typename:GPIO
+main	src/main.c	/^int main(void)  {$/;"	f	typeref:typename:int
+pst_gpio_rx	include/uart.h	/^	GPIO *pst_gpio_rx;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:GPIO *
+pst_gpio_tx	include/uart.h	/^	GPIO *pst_gpio_tx;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:GPIO *
+pst_port	include/gpio.h	/^	GPIO_TypeDef *pst_port;$/;"	m	struct:__anon4f91665d0108	typeref:typename:GPIO_TypeDef *
+pst_usart_sel	include/uart.h	/^	USART_TypeDef * pst_usart_sel;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:USART_TypeDef *
+rcc_ahb_frequency	include/common.h	/^uint32_t rcc_ahb_frequency;$/;"	v	typeref:typename:uint32_t
+rcc_apb1_frequency	include/common.h	/^uint32_t rcc_apb1_frequency;$/;"	v	typeref:typename:uint32_t
+rcc_apb2_frequency	include/common.h	/^uint32_t rcc_apb2_frequency;$/;"	v	typeref:typename:uint32_t
+rx_len	src/main.c	/^uint32_t rx_len = 0;    \/\/ length of the received string$/;"	v	typeref:typename:uint32_t
+rx_string	src/main.c	/^char rx_string[1001];    \/\/ string to hold the received data$/;"	v	typeref:typename:char[1001]
+tx_string	src/main.c	/^char tx_string[1001];    \/\/ string to hold the data to be sent$/;"	v	typeref:typename:char[1001]
+u32_af	include/gpio.h	/^	uint32_t u32_af;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
+u32_baudrate	include/uart.h	/^	uint32_t u32_baudrate;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_data_bits	include/uart.h	/^	uint32_t u32_data_bits;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_flow_control	include/uart.h	/^	uint32_t u32_flow_control;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_mode	include/gpio.h	/^	uint32_t u32_mode;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
+u32_mode	include/uart.h	/^	uint32_t u32_mode;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_parity	include/uart.h	/^	uint32_t u32_parity;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_pin	include/gpio.h	/^	uint32_t u32_pin;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
+u32_speed	include/gpio.h	/^	uint32_t u32_speed;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
+u32_stop_bits	include/uart.h	/^	uint32_t u32_stop_bits;$/;"	m	struct:__anon6f2f344a0108	typeref:typename:uint32_t
+u32_type	include/gpio.h	/^	uint32_t u32_type;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
+u32_up_down	include/gpio.h	/^	uint32_t u32_up_down;$/;"	m	struct:__anon4f91665d0108	typeref:typename:uint32_t
