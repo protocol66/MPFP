@@ -4,6 +4,7 @@
 #include <stm32l4xx.h>				// processor defines
 #include <stm32l4xx_ll_bus.h>		// needed for enabling clock to peripherals
 #include <stm32l4xx_ll_usart.h>		// needed to configure the uart
+#include <stm32l4xx_ll_dma.h>		// needed to configure the DMA
 
 #include "common.h"
 #include "gpio.h"
@@ -109,6 +110,40 @@ void fn_setup_usart(USART *usart)	{
     // this came from an example provided by STM
 	while((!(LL_USART_IsActiveFlag_TEACK(usart->pst_usart_sel))) || (!(LL_USART_IsActiveFlag_REACK(usart->pst_usart_sel)))); 
 }
+
+
+// code based off https://github.com/STMicroelectronics/STM32CubeL4/blob/master/Projects/NUCLEO-L476RG/Examples_LL/USART/USART_Communication_TxRx_DMA/Src/main.c
+void fn_setup_usart_dma_rx(USART *usart, uint8_t *pu8_rx_buffer, uint16_t u32_buffer_size)	{
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+
+	LL_DMA_ConfigTransfer(DMA1, LL_DMA_CHANNEL_6, LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_PRIORITY_HIGH | LL_DMA_MODE_NORMAL | LL_DMA_PERIPH_NOINCREMENT | LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_BYTE | LL_DMA_MDATAALIGN_BYTE);
+	LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_6, (uint32_t) &usart->pst_usart_sel->RDR, (uint32_t) pu8_rx_buffer, LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_6));
+	LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_6, u32_buffer_size);
+	LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_6, LL_DMA_REQUEST_2);
+
+	LL_USART_EnableDMAReq_RX(usart->pst_usart_sel);
+	LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_6);
+}
+
+// returns how much space (in bytes) is left in the buffer
+// subtract from length to get how much data is in the buffer
+uint16_t fn_usart_disable_dma_rx(USART *usart)	{
+	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_6);
+	LL_USART_DisableDMAReq_RX(usart->pst_usart_sel);
+	return LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
+}
+
+void fn_usart_reset_counter_dma_rx(USART *usart, uint16_t u32_buffer_size)	{
+	LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_6, u32_buffer_size);
+}
+
+void fn_usart_enable_dma_rx(USART *usart)	{
+	LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_6);
+	LL_USART_EnableDMAReq_RX(usart->pst_usart_sel);
+}
+
+
+
 
 
 void fn_send_char(USART *pst_usart, char car_char)	{
