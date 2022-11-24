@@ -22,6 +22,11 @@
 
 #include "lib.h"
 
+#include "ai_datatypes_defines.h"
+#include "ai_platform.h"
+#include "network.h"
+#include "network_data.h"
+
 
 char rx_string[1001];    // string to hold the received data
 char tx_string[1001];    // string to hold the data to be sent
@@ -29,15 +34,58 @@ uint32_t rx_len = 0;    // length of the received string
 
 
 int main(void)  {
+    ai_error ai_err;
+    ai_i32 nbatch;  
+    float pred;
+    // AI setup
+    // Chunk memory to hold intermediate layer activations
+    AI_ALIGNED(4) ai_u8 activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
+    // Input Output buffers
+    AI_ALIGNED(4) ai_i8 in_data[AI_NETWORK_IN_1_SIZE_BYTES];
+    AI_ALIGNED(4) ai_i8 out_data[AI_NETWORK_OUT_1_SIZE_BYTES];
 
-    // temorary until clock setup is working
-    rcc_ahb_frequency = 4e6;		// clock defautls to 4MHz at startup
+    // Create a network handle
+    ai_handle network = AI_HANDLE_NULL;
+
+    // Initialize wrapper structs that hold pointers to data and info about the
+    // data (tensor height, width, channels)
+    ai_buffer ai_input[AI_NETWORK_IN_NUM] = AI_NETWORK_IN;
+    ai_buffer ai_output[AI_NETWORK_OUT_NUM] = AI_NETWORK_OUT;
+
+    // Set working memory and get weights/biases from model
+    ai_network_params ai_params = {
+        AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
+        AI_NETWORK_DATA_ACTIVATIONS(activations)
+    };
+
+    // Set pointers wrapper structs to our data buffers
+    // ai_input[0].n_batches = 1;
+    ai_input[0].data = AI_HANDLE_PTR(in_data);
+    // ai_output[0].n_batches = 1;
+    ai_output[0].data = AI_HANDLE_PTR(out_data);
+
+
+    // temporary until clock setup is working
+    rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
     rcc_apb1_frequency = 4e6;
     rcc_apb2_frequency = 4e6;
 
-    __disable_irq();    // no interupts needed for this homework
+    __disable_irq();    // no interrupts needed for this homework
 
     SETUP_USART2(57600);     // setup USART2 for printf
+    crc_init();             // initialize CRC peripheral
+
+    // Create instance of neural network
+    ai_err = ai_netwprl_model_create(&network, AI_NETWORK_DATA_CONFIG);
+    if (ai_err.type != AI_ERROR_NONE) {
+        while(1);
+    }
+
+    // Initialize network
+    if (!ai_network_init(network, &ai_params)) {
+        // ai_network_destroy(network);
+        while(1);
+    }
 
     while (1)
     {
@@ -53,6 +101,25 @@ int main(void)  {
             USART2_CLEAR_RX_BUFFER();
             USART2_SEND_STRING("Buffer overflow\n");
         }
+
+        // I have no idea if this is the right way to do this
+        // Read in data from uart
+        // for (int i = 0; i < AI_NETWORK_IN_1_SIZE; i++) {
+        //     // ((ai_float*)in_data)[i] = (ai_float) rx_string[i];
+        // }
+    
+        // // Run the network
+        // nbatch = ai_network_run(network, &ai_input[0], &ai_output[0]);
+        // if (nbat)ch != 1) {
+        //     // ai_network_destroy(network);
+        //     while(1);
+        // }
+        
+        // Get output of network
+        // pred = ((float*)out_data)[0];
+
+        // Enable corresponding LED
+        
     }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
