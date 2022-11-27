@@ -115,5 +115,15 @@ void MEMCOPY(uint8_t *pu8_dest, uint8_t *pu8_src, uint32_t u32_len) {
 	}
 }
 
+__STATIC_INLINE
+int STRING_CHK_EQ(char *pc_str1, char *pc_str2) {
+	for(uint32_t i = 0; (pc_str1[i] != 0) && (pc_str2[i] != 0); i++) {
+		if(pc_str1[i] != pc_str2[i]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 
 #endif

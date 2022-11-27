@@ -133,6 +133,10 @@ uint16_t fn_usart_disable_dma_rx(USART *usart)	{
 	return LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
 }
 
+uint16_t fn_usart_get_dma_cntr_rx(USART *usart)	{
+	return LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
+}
+
 void fn_usart_reset_counter_dma_rx(USART *usart, uint16_t u32_buffer_size)	{
 	LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_6, u32_buffer_size);
 }
@@ -162,7 +166,7 @@ void fn_send_char(USART *pst_usart, char car_char)	{
 * 	@note Impact: overwrites uart tx buffer
 * 	@note Warning: This function could possibly cause an infinite loop if the uart is not setup correctly
 */
-void fn_send_string(USART *pst_usart, const char *car_string)	{
+void fn_send_string(USART *pst_usart, const uint8_t *car_string)	{
 	while (*car_string)	{
 		LL_USART_TransmitData8(pst_usart->pst_usart_sel, *car_string);
 		while (!LL_USART_IsActiveFlag_TXE(pst_usart->pst_usart_sel));
@@ -237,7 +241,7 @@ void SETUP_USART2(uint32_t u32_baudrate)	{
 
 __STATIC_INLINE
 void USART2_SEND_STRING(const char *car_string)	{
-	fn_send_string(&g_st_usart2, car_string);
+	fn_send_string(&g_st_usart2, (uint8_t*)car_string);
 }
 
 
