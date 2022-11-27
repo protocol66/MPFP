@@ -23,11 +23,12 @@
 // Defines and global variables
 #include "common.h"
 
-// periferal includes
+// peripheral includes
 #include "clock.h"
 #include "gpio.h"
 #include "timer.h"
 #include "uart.h"
+#include "crc.h"
 
 // device drivers
 #include "keypad.h"
