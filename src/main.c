@@ -21,11 +21,7 @@
 
 
 #include "lib.h"
-
-#include "ai_datatypes_defines.h"
-#include "ai_platform.h"
-#include "network.h"
-#include "network_data.h"
+#include "at_cmd.h"
 
 
 #define DMA_RX_BUFFER_SIZE 100
@@ -35,38 +31,53 @@ char tx_string[1001];    // string to hold the data to be sent
 uint32_t rx_len = 0;    // length of the received string
 
 
+
+int dma_testing(void) {
+
+    uint16_t data_read;
+
+    while(1)    {
+
+        DELAY_MS(10);
+        data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
+
+        if (data_read > 0) {
+            if (data_read >= DMA_RX_BUFFER_SIZE) {      // if the buffer overflowed nuke it
+                rx_len = 0;
+            } else if (rx_string[data_read-1] == '\n')  {   // check for end of string delimiter
+                rx_len = data_read;
+            }
+
+            fn_usart_disable_dma_rx(&g_st_usart2);
+            fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
+            fn_usart_enable_dma_rx(&g_st_usart2);
+
+            if (rx_len > 0) {
+                rx_string[rx_len] = '\0';                           // terminate string
+
+                if(STRING_CHK_EQ(AT_CMD_RQ_STATUS, rx_string)) {
+                    USART2_SEND_STRING(AT_CMD_TS_STATUS_READY);
+                } else if (STRING_CHK_EQ(AT_CMD_RC_RESET, rx_string)) {
+                    NVIC_SystemReset();
+                } else {
+                    USART2_SEND_STRING(AT_CMD_TS_CMD_INVALID);
+                }
+
+            } else {
+                USART2_CLEAR_RX_BUFFER();
+                USART2_SEND_STRING("Buffer overflow\n");
+            }
+            
+        }       
+    }
+
+
+    return -1;
+}
+
+
 int main(void)  {
-    ai_error ai_err;
-    ai_i32 nbatch;  
-    float pred;
-    // AI setup
-    // Chunk memory to hold intermediate layer activations
-    AI_ALIGNED(4) ai_u8 activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
-    // Input Output buffers
-    AI_ALIGNED(4) ai_i8 in_data[AI_NETWORK_IN_1_SIZE_BYTES];
-    AI_ALIGNED(4) ai_i8 out_data[AI_NETWORK_OUT_1_SIZE_BYTES];
-
-    // Create a network handle
-    ai_handle network = AI_HANDLE_NULL;
-
-    // Initialize wrapper structs that hold pointers to data and info about the
-    // data (tensor height, width, channels)
-    ai_buffer ai_input[AI_NETWORK_IN_NUM] = AI_NETWORK_IN;
-    ai_buffer ai_output[AI_NETWORK_OUT_NUM] = AI_NETWORK_OUT;
-
-    // Set working memory and get weights/biases from model
-    ai_network_params ai_params = {
-        AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
-        AI_NETWORK_DATA_ACTIVATIONS(activations)
-    };
-
-    // Set pointers wrapper structs to our data buffers
-    // ai_input[0].n_batches = 1;
-    ai_input[0].data = AI_HANDLE_PTR(in_data);
-    // ai_output[0].n_batches = 1;
-    ai_output[0].data = AI_HANDLE_PTR(out_data);
-
-
+    
     // temporary until clock setup is working
     rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
     rcc_apb1_frequency = 4e6;
@@ -75,84 +86,8 @@ int main(void)  {
     __disable_irq();    // no interrupts needed for this homework
 
     SETUP_USART2(57600);     // setup USART2 for printf
-    crc_init();             // initialize CRC peripheral
 
-    // Create instance of neural network
-    ai_err = ai_netwprl_model_create(&network, AI_NETWORK_DATA_CONFIG);
-    if (ai_err.type != AI_ERROR_NONE) {
-        while(1);
-    }
-
-    // Initialize network
-    if (!ai_network_init(network, &ai_params)) {
-        // ai_network_destroy(network);
-        while(1);
-    }
-
-    while (1)
-    {
-        // DELAY_MS(10);
-        // rx_len = USART2_RECEIVE_STRING(rx_string, 100);    // receive a string from the user
-        // MEMCOPY(tx_string, rx_string, rx_len);          // copy the received string to the tx string
-
-        // if (rx_len > 0) {
-        //     tx_string[rx_len-1] = '\n';                         // add net
-        //     tx_string[rx_len] = '\0';                           // add carriage return
-        //     USART2_SEND_STRING(tx_string);
-        // } else {
-        //     USART2_CLEAR_RX_BUFFER();
-        //     USART2_SEND_STRING("Buffer overflow\n");
-        // }
-
-
-        // dma test - delay 1s before echoing message
-        uint16_t data_read;
-        DELAY_MS(1000);
-        data_read = DMA_RX_BUFFER_SIZE - fn_usart_disable_dma_rx(&g_st_usart2);
-
-        if (data_read > 0) {
-            if (data_read >= DMA_RX_BUFFER_SIZE) {      // if the buffer overflowed nuke it
-                fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
-            } else if (rx_string[data_read-1] == '\n')  {   // check for end of string delimiter
-                rx_string[data_read] = '\0';        // get ready for transmission
-                USART2_SEND_STRING(rx_string);
-                fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
-            }
-            
-        } 
-
-        fn_usart_enable_dma_rx(&g_st_usart2);
-
-        
-
-        if (rx_len > 0) {
-            tx_string[rx_len-1] = '\n';                         // add net
-            tx_string[rx_len] = '\0';                           // add carriage return
-            USART2_SEND_STRING(tx_string);
-        } else {
-            USART2_CLEAR_RX_BUFFER();
-            USART2_SEND_STRING("Buffer overflow\n");
-        }
-
-        // I have no idea if this is the right way to do this
-        // Read in data from uart
-        // for (int i = 0; i < AI_NETWORK_IN_1_SIZE; i++) {
-        //     // ((ai_float*)in_data)[i] = (ai_float) rx_string[i];
-        // }
-    
-        // // Run the network
-        // nbatch = ai_network_run(network, &ai_input[0], &ai_output[0]);
-        // if (nbat)ch != 1) {
-        //     // ai_network_destroy(network);
-        //     while(1);
-        // }
-        
-        // Get output of network
-        // pred = ((float*)out_data)[0];
-
-        // Enable corresponding LED
-        
-    }
+    dma_testing();
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
 }
