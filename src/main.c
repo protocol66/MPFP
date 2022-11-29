@@ -1,5 +1,6 @@
 /****************************************
-*	Author: 	Jonathan Sanderson		*
+*	Author: 	Parth Patel      		*
+*               Jonathan Sanderson      *
 *	Date:		FAll 2022				*
 *	License:	BSD                  	*
 *****************************************
@@ -18,76 +19,152 @@
 *
 ***/
 
-
+#include <stdbool.h>
 
 #include "lib.h"
 #include "at_cmd.h"
 
+#define IMAGE_SIZE ((uint16_t)3*32*32)
+#define DMA_RX_BUFFER_SIZE ((uint16_t)IMAGE_SIZE + 32)   // extra bytes just in case...
 
-#define DMA_RX_BUFFER_SIZE 100
+__STATIC_INLINE
+void enable_dma_interupt(void)  {
+    NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+}
 
-char rx_string[DMA_RX_BUFFER_SIZE + 1];    // string to hold the received data
-char tx_string[1001];    // string to hold the data to be sent
-uint32_t rx_len = 0;    // length of the received string
-
-
-
-int dma_testing(void) {
-
-    uint16_t data_read;
-
-    while(1)    {
-
-        DELAY_MS(10);
-        data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
-
-        if (data_read > 0) {
-            if (data_read >= DMA_RX_BUFFER_SIZE) {      // if the buffer overflowed nuke it
-                rx_len = 0;
-            } else if (rx_string[data_read-1] == '\n')  {   // check for end of string delimiter
-                rx_len = data_read;
-            }
-
-            fn_usart_disable_dma_rx(&g_st_usart2);
-            fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
-            fn_usart_enable_dma_rx(&g_st_usart2);
-
-            if (rx_len > 0) {
-                rx_string[rx_len] = '\0';                           // terminate string
-
-                if(STRING_CHK_EQ(AT_CMD_RQ_STATUS, rx_string)) {
-                    USART2_SEND_STRING(AT_CMD_TS_STATUS_READY);
-                } else if (STRING_CHK_EQ(AT_CMD_RC_RESET, rx_string)) {
-                    NVIC_SystemReset();
-                } else {
-                    USART2_SEND_STRING(AT_CMD_TS_CMD_INVALID);
-                }
-
-            } else {
-                USART2_CLEAR_RX_BUFFER();
-                USART2_SEND_STRING("Buffer overflow\n");
-            }
-            
-        }       
-    }
-
-
-    return -1;
+__STATIC_INLINE
+void disable_dma_interupt(void)  {
+    NVIC_DisableIRQ(DMA1_Channel6_IRQn);
 }
 
 
-int main(void)  {
-    
+uint8_t dma_rx_buffer_1[DMA_RX_BUFFER_SIZE + 1];   // +1 for null terminator
+uint8_t dma_rx_buffer_2[DMA_RX_BUFFER_SIZE + 1];
+uint8_t *dma_rx_active_buffer = dma_rx_buffer_1;
+bool dma_rx_buffer_ready = true;
+bool system_error = false;
+
+
+void sys_init(void)    {
     // temporary until clock setup is working
     rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
     rcc_apb1_frequency = 4e6;
     rcc_apb2_frequency = 4e6;
 
     __disable_irq();    // no interrupts needed for this homework
+    SETUP_USART2(9600);     // setup USART2 for printf
+}
 
-    SETUP_USART2(57600);     // setup USART2 for printf
+void ai_init(void)  {
+    // TODO:  Initialize the AI :)
+}
 
-    dma_testing();
+void data_ctrl_init(void)    {
+    // setup DMA for USART2
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
+    fn_usart_enable_dma_rx(&g_st_usart2);
+
+    // enable intrupts for DMA
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_6);
+    LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_6);
+    enable_dma_interupt();
+}
+
+
+uint8_t* data_ctrl_get_img(void) {
+
+    while(dma_rx_buffer_ready);        // wait for image to start being loaded into the buffer
+
+    uint32_t data_read = 0;
+
+    // loop till we get a full image
+    while(data_read < IMAGE_SIZE)   {
+        data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
+    }
+
+    // disable dma
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
+
+    // swap buffers
+    if (dma_rx_active_buffer == dma_rx_buffer_1) {
+        dma_rx_active_buffer = dma_rx_buffer_2;
+    } else {
+        dma_rx_active_buffer = dma_rx_buffer_1;
+    }
+
+    // enable dma
+    dma_rx_buffer_ready = true;
+    fn_usart_enable_dma_rx(&g_st_usart2);
+    enable_dma_interupt();
+
+    return dma_rx_active_buffer;
+}
+
+uint8_t* process_img(uint8_t* img)  {
+    DELAY_MS(1000);             // fake processing time
+    return (uint8_t*) 0;
+}
+
+
+int main(void)  {
+    sys_init();
+    ai_init();
+    data_ctrl_init();
+
+    __enable_irq();     // enable interrupts
+
+
+    while(1)    {
+        uint8_t *img = data_ctrl_get_img();
+        uint8_t *output = process_img(img);
+    }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
+}
+
+
+
+
+
+/*RX transfer complete interupt - return ASAP*/
+void DMA1_ReceiveComplete_Callback(void)
+{
+    uint16_t data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
+
+    if (data_read == 0)     // this should never happen, but just in case
+        return;
+
+    if (data_read >= DMA_RX_BUFFER_SIZE)    {   // dma overflow
+        system_error = true;
+        USART2_SEND_STRING(AT_CMD_TS_STATUS_ERROR);     // we dont know what they wanted so send error
+    }
+
+    if (dma_rx_active_buffer[data_read-1] != '\n')      // we are looking for the newline character as a deliniator
+        return;
+
+    dma_rx_active_buffer[data_read] = '\0';     // convert to a string
+
+    if(STRING_CHK_EQ(AT_CMD_RQ_STATUS, (char *)dma_rx_active_buffer)) {
+        if(dma_rx_buffer_ready) {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_READY);
+        } else {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_BUSY);
+        }
+    } else if (STRING_CHK_EQ(AT_CMD_RD_IMAGE, (char *)dma_rx_active_buffer)) {      // image is being sent, disable interupt because this will take a while
+        dma_rx_buffer_ready = false;
+        disable_dma_interupt();
+    }
+    else if (STRING_CHK_EQ(AT_CMD_RC_RESET, (char *)dma_rx_active_buffer)) {        // the oh sh!t button
+        NVIC_SystemReset();
+    } else {
+        USART2_SEND_STRING(AT_CMD_TS_CMD_INVALID);          // Invalid command - it doesn't speak stupid
+    }
+
+    // reset dma counter
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
+    fn_usart_enable_dma_rx(&g_st_usart2);
+            
 }
