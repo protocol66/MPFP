@@ -251,6 +251,18 @@ uint32_t USART2_RECEIVE_STRING(char *car_string, uint32_t u32_max_length)	{
 }
 
 __STATIC_INLINE
+void USART2_SEND_CHAR(char car_char)	{
+	fn_send_char(&g_st_usart2, car_char);
+}
+
+__STATIC_INLINE
+char USART2_RECEIVE_CHAR(void)	{
+	return fn_get_char(&g_st_usart2);
+}
+
+
+
+__STATIC_INLINE
 void USART2_CLEAR_RX_BUFFER(void)	{
 	fn_clear_rx_buffer(&g_st_usart2);
 }

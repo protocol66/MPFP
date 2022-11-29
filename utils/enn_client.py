@@ -18,7 +18,7 @@ class EnnClient:
     AT_CMD_RD_IMAGE          =  "AT+IMAGE=\n"
     AT_CMD_RC_RESET          =  "AT+RESET!\n"
 
-    def __init__(self, video_device=0, refresh_period=0.5, img_out_size=(28,28), fov=0.5, **kwargs):
+    def __init__(self, video_device=0, refresh_period=0.1, img_out_size=(32,32), fov=0.5, **kwargs):
         self.video = cv2.VideoCapture(video_device)
         self.frame = None
         self.scaled_frame = None
@@ -30,7 +30,7 @@ class EnnClient:
         self.com_status = None
 
         port = kwargs.get('port', '/dev/ttyACM0')
-        baud = kwargs.get('baud', 9600)
+        baud = kwargs.get('baud', 57600)
         self.ser = serial.Serial(port, baud)
 
     async def get_frame(self):
@@ -66,7 +66,7 @@ class EnnClient:
                 self.ser.flushInput()  # clear buffer
                 self.ser.write(self.AT_CMD_RQ_STATUS.encode())
                 await asyncio.sleep(0.1)
-                rx = self.ser.readline()
+                rx = self.ser.read(self.ser.inWaiting())
 
                 if rx == self.AT_CMD_TS_STATUS_READY.encode():
                     self.connected = True
@@ -81,12 +81,13 @@ class EnnClient:
                     self.com_status = 'ERROR'
                     return
                 else:
+                    logging.debug(f'rx: invalid response{rx.decode()}')
                     self.connected = False
                     self.com_status = None
                     
             await asyncio.sleep(0.1)
             self.ser.write(self.AT_CMD_RC_RESET.encode())  # reset device
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.5)
         
         logging.error('Failed to get status from device')
         exit()
@@ -105,10 +106,10 @@ class EnnClient:
             await self._get_status()
             logging.debug(f'com_status: {self.com_status}')
             if self.com_status == 'READY':
-                pass
-                # if self.scaled_frame is not None:
-                #     await self.send_frame()
-                #     logging.debug('sent frame')
+                if self.scaled_frame is not None:
+                    await self.send_frame()
+                    logging.debug('sent frame')
+                    await asyncio.sleep(0.1)
 
             if self.com_status == 'ERROR':
                 self.ser.write(self.AT_CMD_RC_RESET.encode())
@@ -136,6 +137,6 @@ class EnnClient:
 
 if __name__ == '__main__':
     logging.debug('Creating enn client')
-    ec = EnnClient(refresh_period=0.1)
+    ec = EnnClient()
     logging.debug('Running enn client')
     ec.run()

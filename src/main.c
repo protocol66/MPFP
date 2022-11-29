@@ -24,8 +24,7 @@
 #include "lib.h"
 #include "at_cmd.h"
 
-// #define IMAGE_SIZE ((uint16_t)3*32*32)
-#define IMAGE_SIZE (100)                        // just for testing
+#define IMAGE_SIZE ((uint16_t)3*32*32)
 #define DMA_RX_BUFFER_SIZE (IMAGE_SIZE + 32)   // extra bytes just in case...
 
 __STATIC_INLINE
@@ -56,7 +55,7 @@ void sys_init(void)    {
     rcc_apb2_frequency = 4e6;
 
     __disable_irq();    // no interrupts needed for this homework
-    SETUP_USART2(9600);     // setup USART2 for printf
+    SETUP_USART2(57600);     // setup USART2 for printf
 }
 
 void ai_init(void)  {
@@ -69,7 +68,7 @@ void data_ctrl_init(void)    {
     fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
     fn_usart_enable_dma_rx(&g_st_usart2);
 
-    // enable intrupts for DMA
+    // enable intrupts for receiving commands
     enable_usart_interupt();
 }
 
@@ -109,7 +108,7 @@ uint8_t* data_ctrl_get_img(void) {
 }
 
 uint8_t* process_img(uint8_t* img)  {
-    DELAY_MS(1000);             // fake processing time
+    DELAY_MS(400);             // fake processing time
     return (uint8_t*) 0;
 }
 
