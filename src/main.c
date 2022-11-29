@@ -24,17 +24,21 @@
 #include "lib.h"
 #include "at_cmd.h"
 
-#define IMAGE_SIZE ((uint16_t)3*32*32)
-#define DMA_RX_BUFFER_SIZE ((uint16_t)IMAGE_SIZE + 32)   // extra bytes just in case...
+// #define IMAGE_SIZE ((uint16_t)3*32*32)
+#define IMAGE_SIZE (100)                        // just for testing
+#define DMA_RX_BUFFER_SIZE (IMAGE_SIZE + 32)   // extra bytes just in case...
 
 __STATIC_INLINE
-void enable_dma_interupt(void)  {
-    NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+void enable_usart_interupt(void)  {
+    LL_USART_EnableIT_RXNE(g_st_usart2.pst_usart_sel);
+    NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_SetPriority(USART2_IRQn, 0);
 }
 
 __STATIC_INLINE
-void disable_dma_interupt(void)  {
-    NVIC_DisableIRQ(DMA1_Channel6_IRQn);
+void disable_usart_interupt(void)  {
+    LL_USART_DisableIT_RXNE(g_st_usart2.pst_usart_sel);
+    NVIC_DisableIRQ(USART2_IRQn);
 }
 
 
@@ -66,9 +70,7 @@ void data_ctrl_init(void)    {
     fn_usart_enable_dma_rx(&g_st_usart2);
 
     // enable intrupts for DMA
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_6);
-    LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_6);
-    enable_dma_interupt();
+    enable_usart_interupt();
 }
 
 
@@ -88,18 +90,22 @@ uint8_t* data_ctrl_get_img(void) {
     fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
 
     // swap buffers
+    uint8_t * image_ready;
     if (dma_rx_active_buffer == dma_rx_buffer_1) {
         dma_rx_active_buffer = dma_rx_buffer_2;
+        image_ready = dma_rx_buffer_1;
     } else {
         dma_rx_active_buffer = dma_rx_buffer_1;
+        image_ready = dma_rx_buffer_2;
     }
 
     // enable dma
     dma_rx_buffer_ready = true;
+    fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
     fn_usart_enable_dma_rx(&g_st_usart2);
-    enable_dma_interupt();
+    enable_usart_interupt();
 
-    return dma_rx_active_buffer;
+    return image_ready;
 }
 
 uint8_t* process_img(uint8_t* img)  {
@@ -115,7 +121,6 @@ int main(void)  {
 
     __enable_irq();     // enable interrupts
 
-
     while(1)    {
         uint8_t *img = data_ctrl_get_img();
         uint8_t *output = process_img(img);
@@ -128,8 +133,8 @@ int main(void)  {
 
 
 
-/*RX transfer complete interupt - return ASAP*/
-void DMA1_ReceiveComplete_Callback(void)
+/* uart handler to catch commands*/
+void USART2_IRQHandler(void)
 {
     uint16_t data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
 
@@ -153,8 +158,12 @@ void DMA1_ReceiveComplete_Callback(void)
             USART2_SEND_STRING(AT_CMD_TS_STATUS_BUSY);
         }
     } else if (STRING_CHK_EQ(AT_CMD_RD_IMAGE, (char *)dma_rx_active_buffer)) {      // image is being sent, disable interupt because this will take a while
-        dma_rx_buffer_ready = false;
-        disable_dma_interupt();
+        if(dma_rx_buffer_ready) {
+            dma_rx_buffer_ready = false;
+            disable_usart_interupt();
+        } else {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_BUSY);
+        }
     }
     else if (STRING_CHK_EQ(AT_CMD_RC_RESET, (char *)dma_rx_active_buffer)) {        // the oh sh!t button
         NVIC_SystemReset();
