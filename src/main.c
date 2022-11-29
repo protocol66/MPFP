@@ -30,6 +30,8 @@
 
 #define DMA_RX_BUFFER_SIZE 100
 
+void SystemClock_Config(void);
+
 char rx_string[DMA_RX_BUFFER_SIZE + 1];    // string to hold the received data
 char tx_string[1001];    // string to hold the data to be sent
 uint32_t rx_len = 0;    // length of the received string
@@ -67,10 +69,12 @@ int main(void)  {
     ai_output[0].data = AI_HANDLE_PTR(out_data);
 
 
-    // temporary until clock setup is working
-    rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
-    rcc_apb1_frequency = 4e6;
-    rcc_apb2_frequency = 4e6;
+    // // temporary until clock setup is working
+    // rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
+    // rcc_apb1_frequency = 4e6;
+    // rcc_apb2_frequency = 4e6;
+    SystemClock_Config();  // Initialize the system clock
+
 
     __disable_irq();    // no interrupts needed for this homework
 
@@ -155,4 +159,43 @@ int main(void)  {
     }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
+}
+
+// System clock configuration
+void SystemClock_Config() {
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
+    LL_RCC_MSI_Enable();
+    while (LL_RCC_MSI_IsReady() != 1) {
+        // Wait for MSI ready
+    };
+    
+    // PLL configuration
+    // PLLCLK = MSI(4 MHz) / 1 * 40 / 2 = 80 MHz
+    uint32_t PLLM = LL_RCC_PLLM_DIV_1;
+    uint32_t PLLN = 40;
+    uint32_t PLLR = LL_RCC_PLLR_DIV_2;
+    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, PLLM, PLLN, PLLR);
+    LL_RCC_PLL_Enable();
+    LL_RCC_PLL_EnableDomain_SYS();
+    while (LL_RCC_PLL_IsReady() != 1) {
+        // Wait for PLL ready
+    };
+
+    // Set AHB prescaler
+    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
+        // Wait for system clock switch to PLL
+    };
+
+    // Set APB1 & APB2 prescaler
+    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+    LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+
+    // Set systick to 1ms
+    LL_Init1msTick(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
+    // LL_Init1msTick(80000000);
+    // Update CMSIS variable
+    LL_SetSystemCoreClock(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
+    // LL_SetSystemCoreClock(80000000);
 }
