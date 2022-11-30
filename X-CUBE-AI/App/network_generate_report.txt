@@ -1,65 +1,65 @@
 Neural Network Tools for STM32AI v1.6.0 (STM.ai v7.3.0-RC5)
-Created date          : 2022-11-23 20:05:01
-Parameters            : generate --name network -m /home/parthpatel/Downloads/lenet_cifar10.onnx --type onnx --compression medium --verbosity 1 --workspace /tmp/mxAI_workspace3306356629424910931255251861310042 --output /home/parthpatel/.stm32cubemx/network_output --allocate-inputs --allocate-outputs
+Created date          : 2022-11-29 11:38:51
+Parameters            : generate --name network -m C:/Users/Parth/Documents/Github/ENN/model/32x32/lenet_cifar10.onnx --type onnx --compression medium --verbosity 1 --workspace C:\Users\Parth\AppData\Local\Temp\mxAI_workspace506860650547009064146081986352035 --output C:\Users\Parth\.stm32cubemx\network_output --allocate-inputs --allocate-outputs
 
 Exec/report summary (generate)
-----------------------------------------------------------------------------------------------
-model file         :   /home/parthpatel/Downloads/lenet_cifar10.onnx                         
-type               :   onnx                                                                  
-c_name             :   network                                                               
-compression        :   medium                                                                
-options            :   allocate-inputs, allocate-outputs                                     
-optimization       :   balanced                                                              
-target/series      :   generic                                                               
-workspace dir      :   /tmp/mxAI_workspace3306356629424910931255251861310042                 
-output dir         :   /home/parthpatel/.stm32cubemx/network_output                          
-model_fmt          :   float                                                                 
-model_name         :   lenet_cifar10                                                         
-model_hash         :   73687afb9e14135488027bd5957a7107                                      
-params #           :   545,846 items (2.08 MiB)                                              
-----------------------------------------------------------------------------------------------
-input 1/1          :   'input' (domain:activations/**default**)                              
-                   :   2352 items, 9.19 KiB, ai_float, float, (1,3,28,28)                    
-output 1/1         :   'output' (domain:activations/**default**)                             
-                   :   10 items, 40 B, ai_float, float, (1,1,1,10)                           
-macc               :   3,691,840                                                             
-weights (ro)       :   454,728 B (444.07 KiB) (1 segment) / -1,728,656(-79.2%) vs float model
-activations (rw)   :   47,040 B (45.94 KiB) (1 segment) *                                    
-ram (total)        :   47,040 B (45.94 KiB) = 47,040 + 0 + 0                                 
-----------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+model file         :   C:\Users\Parth\Documents\Github\ENN\model\32x32\lenet_cifar10.onnx               
+type               :   onnx                                                                             
+c_name             :   network                                                                          
+compression        :   medium                                                                           
+options            :   allocate-inputs, allocate-outputs                                                
+optimization       :   balanced                                                                         
+target/series      :   generic                                                                          
+workspace dir      :   C:\Users\Parth\AppData\Local\Temp\mxAI_workspace506860650547009064146081986352035
+output dir         :   C:\Users\Parth\.stm32cubemx\network_output                                       
+model_fmt          :   float                                                                            
+model_name         :   lenet_cifar10                                                                    
+model_hash         :   1eb2760747c27be1f84de83f759d268e                                                 
+params #           :   697,046 items (2.66 MiB)                                                         
+---------------------------------------------------------------------------------------------------------
+input 1/1          :   'input' (domain:activations/**default**)                                         
+                   :   3072 items, 12.00 KiB, ai_float, float, (1,3,32,32)                              
+output 1/1         :   'output' (domain:activations/**default**)                                        
+                   :   10 items, 40 B, ai_float, float, (1,1,1,10)                                      
+macc               :   4,821,640                                                                        
+weights (ro)       :   530,328 B (517.90 KiB) (1 segment) / -2,257,856(-81.0%) vs float model           
+activations (rw)   :   61,440 B (60.00 KiB) (1 segment) *                                               
+ram (total)        :   61,440 B (60.00 KiB) = 61,440 + 0 + 0                                            
+---------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers can be used from the activations buffer
 
 Model name - lenet_cifar10 ['input'] ['output']
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 id   layer (type,original)                                                       oshape                 param/size          macc        connected to                                              |   c_size               c_macc                  c_type                  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-10   classifier_0_weight (Placeholder, Gemm)                                     [h:5880,c:84]          493,920/1,975,680                                                                         |   -1,728,320(-87.5%)   +494,004(+100.0%)       dense_wc4of32[5]        
+10   classifier_0_weight (Placeholder, Gemm)                                     [h:7680,c:84]          645,120/2,580,480                                                                         |   -2,257,520(-87.5%)   +645,204(+100.0%)       dense_wc4of32[5]        
      classifier_0_bias (Placeholder, Gemm)                                       [c:84]                 84/336                                                                                    |   -336(-100.0%)                               
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 12   classifier_2_weight (Placeholder, Gemm)                                     [h:84,c:10]            840/3,360                                                                                 |   +40(+1.2%)           +850(+100.0%)           dense_of32[o][7]        
      classifier_2_bias (Placeholder, Gemm)                                       [c:10]                 10/40                                                                                     |   -40(-100.0%)                                
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-0    input (Input, )                                                             [b:1,h:28,w:28,c:3]                                                                                              |                                               
+0    input (Input, )                                                             [b:1,h:32,w:32,c:3]                                                                                              |                                               
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-1    _feature_extractor_feature_extractor_0_Conv_output_0 (Conv2D, Conv)         [b:1,h:28,w:28,c:6]    456/1,824           352,806     input                                                     |   -1,824(-100.0%)      -352,806(-100.0%)      
+1    _feature_extractor_feature_extractor_0_Conv_output_0 (Conv2D, Conv)         [b:1,h:32,w:32,c:6]    456/1,824           460,806     input                                                     |   -1,824(-100.0%)      -460,806(-100.0%)      
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2    _feature_extractor_feature_extractor_1_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:28,w:28,c:6]                        4,704       _feature_extractor_feature_extractor_0_Conv_output_0      |                        -4,704(-100.0%)         transpose_of32[0]       
+2    _feature_extractor_feature_extractor_1_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:32,w:32,c:6]                        6,144       _feature_extractor_feature_extractor_0_Conv_output_0      |                        -6,144(-100.0%)         transpose_of32[0]       
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-3    _feature_extractor_feature_extractor_2_MaxPool_output_0 (Pool, MaxPool)     [b:1,h:14,w:14,c:6]                        4,704       _feature_extractor_feature_extractor_1_Relu_output_0      |   +1,824(+100.0%)      +357,510(+7600.1%)      optimized_conv2d_of32[1]
+3    _feature_extractor_feature_extractor_2_MaxPool_output_0 (Pool, MaxPool)     [b:1,h:16,w:16,c:6]                        6,144       _feature_extractor_feature_extractor_1_Relu_output_0      |   +1,824(+100.0%)      +466,950(+7600.1%)      optimized_conv2d_of32[1]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-4    _feature_extractor_feature_extractor_3_Conv_output_0 (Conv2D, Conv)         [b:1,h:14,w:14,c:16]   2,416/9,664         470,416     _feature_extractor_feature_extractor_2_MaxPool_output_0   |   -9,664(-100.0%)      -470,416(-100.0%)      
+4    _feature_extractor_feature_extractor_3_Conv_output_0 (Conv2D, Conv)         [b:1,h:16,w:16,c:16]   2,416/9,664         614,416     _feature_extractor_feature_extractor_2_MaxPool_output_0   |   -9,664(-100.0%)      -614,416(-100.0%)      
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-5    _feature_extractor_feature_extractor_4_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:14,w:14,c:16]                       3,136       _feature_extractor_feature_extractor_3_Conv_output_0      |                        -3,136(-100.0%)        
+5    _feature_extractor_feature_extractor_4_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:16,w:16,c:16]                       4,096       _feature_extractor_feature_extractor_3_Conv_output_0      |                        -4,096(-100.0%)        
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-6    _feature_extractor_feature_extractor_5_MaxPool_output_0 (Pool, MaxPool)     [b:1,h:7,w:7,c:16]                         3,136       _feature_extractor_feature_extractor_4_Relu_output_0      |   +9,664(+100.0%)      +473,552(+15100.5%)     optimized_conv2d_of32[2]
+6    _feature_extractor_feature_extractor_5_MaxPool_output_0 (Pool, MaxPool)     [b:1,h:8,w:8,c:16]                         4,096       _feature_extractor_feature_extractor_4_Relu_output_0      |   +9,664(+100.0%)      +618,512(+15100.4%)     optimized_conv2d_of32[2]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-7    _feature_extractor_feature_extractor_6_Conv_output_0 (Conv2D, Conv)         [b:1,h:7,w:7,c:120]    48,120/192,480      2,352,120   _feature_extractor_feature_extractor_5_MaxPool_output_0   |   -192,480(-100.0%)    -2,352,120(-100.0%)    
+7    _feature_extractor_feature_extractor_6_Conv_output_0 (Conv2D, Conv)         [b:1,h:8,w:8,c:120]    48,120/192,480      3,072,120   _feature_extractor_feature_extractor_5_MaxPool_output_0   |   -192,480(-100.0%)    -3,072,120(-100.0%)    
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-8    _feature_extractor_feature_extractor_7_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:7,w:7,c:120]                        5,880       _feature_extractor_feature_extractor_6_Conv_output_0      |   +192,480(+100.0%)    +2,352,120(+40002.0%)   conv2d_of32[3]          
+8    _feature_extractor_feature_extractor_7_Relu_output_0 (Nonlinearity, Relu)   [b:1,h:8,w:8,c:120]                        7,680       _feature_extractor_feature_extractor_6_Conv_output_0      |   +192,480(+100.0%)    +3,072,120(+40001.6%)   conv2d_of32[3]          
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-9    _Flatten_output_0 (Reshape, Flatten)                                        [b:1,c:5880]                                           _feature_extractor_feature_extractor_7_Relu_output_0      |                                                transpose_of32[4]       
+9    _Flatten_output_0 (Reshape, Flatten)                                        [b:1,c:7680]                                           _feature_extractor_feature_extractor_7_Relu_output_0      |                                                transpose_of32[4]       
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-10   _classifier_classifier_0_Gemm_output_0 (Gemm, Gemm)                         [b:1,c:84]                                 494,004     _Flatten_output_0                                         |                        -494,004(-100.0%)      
+10   _classifier_classifier_0_Gemm_output_0 (Gemm, Gemm)                         [b:1,c:84]                                 645,204     _Flatten_output_0                                         |                        -645,204(-100.0%)      
                                                                                                                                         classifier_0_weight                                       |  
                                                                                                                                         classifier_0_bias                                         |  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ id   layer (type,original)                                                      
                                                                                                                                         classifier_2_weight                                       |  
                                                                                                                                         classifier_2_bias                                         |  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-model/c-model: macc=3,691,840/3,691,840  weights=2,183,384/454,728 -1,728,656(-79.2%) activations=--/47,040 io=--/0
+model/c-model: macc=4,821,640/4,821,640  weights=2,788,184/530,328 -2,257,856(-81.0%) activations=--/61,440 io=--/0
 
 
 
@@ -79,9 +79,9 @@ model name            : lenet_cifar10
 c-name                : network
 c-node #              : 8
 c-array #             : 21
-activations size      : 47040 (1 segment)
-weights size          : 454728 (1 segment)
-macc                  : 3691840
+activations size      : 61440 (1 segment)
+weights size          : 530328 (1 segment)
+macc                  : 4821640
 inputs                : ['input_output']
 outputs               : ['output_output']
 
@@ -89,18 +89,18 @@ C-Arrays (21)
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 c_id   name (*_array)                                                  item/size       domain/mem-pool           c-type        fmt         comment
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-0      _classifier_classifier_0_Gemm_output_0_weights                  493920/247024   weights/weights           const float   c4 (LUT4)          
+0      _classifier_classifier_0_Gemm_output_0_weights                  645120/322624   weights/weights           const float   c4 (LUT4)          
 1      _classifier_classifier_0_Gemm_output_0_bias                     84/336          weights/weights           const float   float32            
 2      output_weights                                                  840/3360        weights/weights           const float   float32            
 3      output_bias                                                     10/40           weights/weights           const float   float32            
-4      _feature_extractor_feature_extractor_0_Conv_output_0_scratch0   336/1344        activations/**default**   float         float32            
-5      _feature_extractor_feature_extractor_3_Conv_output_0_scratch0   448/1792        activations/**default**   float         float32            
-6      input_output                                                    2352/9408       activations/**default**   float         float32     /input 
-7      input_Transpose_output                                          2352/9408       activations/**default**   float         float32            
-8      _feature_extractor_feature_extractor_0_Conv_output_0_output     1176/4704       activations/**default**   float         float32            
-9      _feature_extractor_feature_extractor_3_Conv_output_0_output     784/3136        activations/**default**   float         float32            
-10     _feature_extractor_feature_extractor_6_Conv_output_0_output     5880/23520      activations/**default**   float         float32            
-11     _Flatten_output_0_to_chlast_output                              5880/23520      activations/**default**   float         float32            
+4      _feature_extractor_feature_extractor_0_Conv_output_0_scratch0   384/1536        activations/**default**   float         float32            
+5      _feature_extractor_feature_extractor_3_Conv_output_0_scratch0   512/2048        activations/**default**   float         float32            
+6      input_output                                                    3072/12288      activations/**default**   float         float32     /input 
+7      input_Transpose_output                                          3072/12288      activations/**default**   float         float32            
+8      _feature_extractor_feature_extractor_0_Conv_output_0_output     1536/6144       activations/**default**   float         float32            
+9      _feature_extractor_feature_extractor_3_Conv_output_0_output     1024/4096       activations/**default**   float         float32            
+10     _feature_extractor_feature_extractor_6_Conv_output_0_output     7680/30720      activations/**default**   float         float32            
+11     _Flatten_output_0_to_chlast_output                              7680/30720      activations/**default**   float         float32            
 12     _classifier_classifier_0_Gemm_output_0_output                   84/336          activations/**default**   float         float32            
 13     _classifier_classifier_1_Relu_output_0_output                   84/336          activations/**default**   float         float32            
 14     output_output                                                   10/40           activations/**default**   float         float32     /output
@@ -116,31 +116,31 @@ C-Layers (8)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 c_id   name (*_layer)                                         id   layer_type          macc      rom      tensors                                                            shape (array id) 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-0      input_Transpose                                        2    transpose           0         0        I: input_output                                                    (1,3,28,28) (6)  
-                                                                                                          O: input_Transpose_output                                          (1,28,28,3) (7)  
+0      input_Transpose                                        2    transpose           0         0        I: input_output                                                    (1,3,32,32) (6)  
+                                                                                                          O: input_Transpose_output                                          (1,32,32,3) (7)  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-1      _feature_extractor_feature_extractor_0_Conv_output_0   3    optimized_conv2d    362214    1824     I: input_Transpose_output                                          (1,28,28,3) (7)  
+1      _feature_extractor_feature_extractor_0_Conv_output_0   3    optimized_conv2d    473094    1824     I: input_Transpose_output                                          (1,32,32,3) (7)  
                                                                                                           S: _feature_extractor_feature_extractor_0_Conv_output_0_scratch0                    
                                                                                                           W: _feature_extractor_feature_extractor_0_Conv_output_0_weights    (3,6,5,5) (15)   
                                                                                                           W: _feature_extractor_feature_extractor_0_Conv_output_0_bias       (1,1,1,6) (16)   
-                                                                                                          O: _feature_extractor_feature_extractor_0_Conv_output_0_output     (1,14,14,6) (8)  
+                                                                                                          O: _feature_extractor_feature_extractor_0_Conv_output_0_output     (1,16,16,6) (8)  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2      _feature_extractor_feature_extractor_3_Conv_output_0   6    optimized_conv2d    476688    9664     I: _feature_extractor_feature_extractor_0_Conv_output_0_output     (1,14,14,6) (8)  
+2      _feature_extractor_feature_extractor_3_Conv_output_0   6    optimized_conv2d    622608    9664     I: _feature_extractor_feature_extractor_0_Conv_output_0_output     (1,16,16,6) (8)  
                                                                                                           S: _feature_extractor_feature_extractor_3_Conv_output_0_scratch0                    
                                                                                                           W: _feature_extractor_feature_extractor_3_Conv_output_0_weights    (6,16,5,5) (17)  
                                                                                                           W: _feature_extractor_feature_extractor_3_Conv_output_0_bias       (1,1,1,16) (18)  
-                                                                                                          O: _feature_extractor_feature_extractor_3_Conv_output_0_output     (1,7,7,16) (9)   
+                                                                                                          O: _feature_extractor_feature_extractor_3_Conv_output_0_output     (1,8,8,16) (9)   
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-3      _feature_extractor_feature_extractor_6_Conv_output_0   8    conv2d              2358000   192480   I: _feature_extractor_feature_extractor_3_Conv_output_0_output     (1,7,7,16) (9)   
+3      _feature_extractor_feature_extractor_6_Conv_output_0   8    conv2d              3079800   192480   I: _feature_extractor_feature_extractor_3_Conv_output_0_output     (1,8,8,16) (9)   
                                                                                                           W: _feature_extractor_feature_extractor_6_Conv_output_0_weights    (16,120,5,5) (19)
                                                                                                           W: _feature_extractor_feature_extractor_6_Conv_output_0_bias       (1,1,1,120) (20) 
-                                                                                                          O: _feature_extractor_feature_extractor_6_Conv_output_0_output     (1,7,7,120) (10) 
+                                                                                                          O: _feature_extractor_feature_extractor_6_Conv_output_0_output     (1,8,8,120) (10) 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-4      _Flatten_output_0_to_chlast                            9    transpose           0         0        I: _feature_extractor_feature_extractor_6_Conv_output_0_output     (1,7,7,120) (10) 
-                                                                                                          O: _Flatten_output_0_to_chlast_output                              (1,120,7,7) (11) 
+4      _Flatten_output_0_to_chlast                            9    transpose           0         0        I: _feature_extractor_feature_extractor_6_Conv_output_0_output     (1,8,8,120) (10) 
+                                                                                                          O: _Flatten_output_0_to_chlast_output                              (1,120,8,8) (11) 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-5      _classifier_classifier_0_Gemm_output_0                 10   dense               494004    247360   I: _Flatten_output_0_to_chlast_output0                             (1,1,1,5880) (11)
-                                                                                                          W: _classifier_classifier_0_Gemm_output_0_weights                  (5880,1,1,84) (0)
+5      _classifier_classifier_0_Gemm_output_0                 10   dense               645204    322960   I: _Flatten_output_0_to_chlast_output0                             (1,1,1,7680) (11)
+                                                                                                          W: _classifier_classifier_0_Gemm_output_0_weights                  (7680,1,1,84) (0)
                                                                                                           W: _classifier_classifier_0_Gemm_output_0_bias                     (1,1,1,84) (1)   
                                                                                                           O: _classifier_classifier_0_Gemm_output_0_output                   (1,1,1,84) (12)  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,43 +160,43 @@ Number of operations per c-layer
 c_id    m_id   name (type)                                                               #op (type)                       #param (sparsity)      
 --------------------------------------------------------------------------------------------------------------------------------------------------
 0       2      input_Transpose (transpose)                                                             0 (smul_f32_f32)                          
-1       3      _feature_extractor_feature_extractor_0_Conv_output_0 (optimized_conv2d)           362,214 (smul_f32_f32)              456 (0.0000)
-2       6      _feature_extractor_feature_extractor_3_Conv_output_0 (optimized_conv2d)           476,688 (smul_f32_f32)            2,416 (0.0000)
-3       8      _feature_extractor_feature_extractor_6_Conv_output_0 (conv2d)                   2,358,000 (smul_f32_f32)           48,120 (0.0000)
+1       3      _feature_extractor_feature_extractor_0_Conv_output_0 (optimized_conv2d)           473,094 (smul_f32_f32)              456 (0.0000)
+2       6      _feature_extractor_feature_extractor_3_Conv_output_0 (optimized_conv2d)           622,608 (smul_f32_f32)            2,416 (0.0000)
+3       8      _feature_extractor_feature_extractor_6_Conv_output_0 (conv2d)                   3,079,800 (smul_f32_f32)           48,120 (0.0000)
 4       9      _Flatten_output_0_to_chlast (transpose)                                                 0 (smul_f32_f32)                          
-5       10     _classifier_classifier_0_Gemm_output_0 (dense)                                    494,004 (smul_f32_c4)           494,004 (0.0000)
+5       10     _classifier_classifier_0_Gemm_output_0 (dense)                                    645,204 (smul_f32_c4)           645,204 (0.0000)
 6       11     _classifier_classifier_1_Relu_output_0 (nl)                                            84 (op_f32_f32)                            
 7       12     output (dense)                                                                        850 (smul_f32_f32)              850 (0.0000)
 --------------------------------------------------------------------------------------------------------------------------------------------------
-total                                                                                          3,691,840                         545,846 (0.0000)
+total                                                                                          4,821,640                         697,046 (0.0000)
 
   Number of operation types
   ---------------------------------------------
-  smul_f32_f32           3,197,752       86.6%
-  smul_f32_c4              494,004       13.4%
+  smul_f32_f32           4,176,352       86.6%
+  smul_f32_c4              645,204       13.4%
   op_f32_f32                    84        0.0%
 
 Complexity report (model)
 --------------------------------------------------------------------------------------------------------------------------
 m_id   name                                                      c_macc                    c_rom                     c_id
 --------------------------------------------------------------------------------------------------------------------------
-10     classifier_0_weight                                       ||||              13.4%   ||||||||||||||||  54.4%   [5] 
-12     classifier_2_weight                                       |                  0.0%   |                  0.7%   [7] 
+10     classifier_0_weight                                       ||||              13.4%   ||||||||||||||||  60.9%   [5] 
+12     classifier_2_weight                                       |                  0.0%   |                  0.6%   [7] 
 2      _feature_extractor_feature_extractor_1_Relu_output_0      |                  0.0%   |                  0.0%   [0] 
-3      _feature_extractor_feature_extractor_2_MaxPool_output_0   |||                9.8%   |                  0.4%   [1] 
-6      _feature_extractor_feature_extractor_5_MaxPool_output_0   ||||              12.9%   |                  2.1%   [2] 
-8      _feature_extractor_feature_extractor_7_Relu_output_0      ||||||||||||||||  63.9%   ||||||||||||      42.3%   [3] 
+3      _feature_extractor_feature_extractor_2_MaxPool_output_0   |||                9.8%   |                  0.3%   [1] 
+6      _feature_extractor_feature_extractor_5_MaxPool_output_0   ||||              12.9%   |                  1.8%   [2] 
+8      _feature_extractor_feature_extractor_7_Relu_output_0      ||||||||||||||||  63.9%   |||||||||         36.3%   [3] 
 9      _Flatten_output_0                                         |                  0.0%   |                  0.0%   [4] 
 11     _classifier_classifier_1_Relu_output_0                    |                  0.0%   |                  0.0%   [6] 
 --------------------------------------------------------------------------------------------------------------------------
-macc=3,691,840 weights=454,728 act=47,040 ram_io=0
+macc=4,821,640 weights=530,328 act=61,440 ram_io=0
 
 Generated files (7)
-----------------------------------------------------------------------------
-/home/parthpatel/.stm32cubemx/network_output/network_config.h
-/home/parthpatel/.stm32cubemx/network_output/network.h
-/home/parthpatel/.stm32cubemx/network_output/network.c
-/home/parthpatel/.stm32cubemx/network_output/network_data_params.h
-/home/parthpatel/.stm32cubemx/network_output/network_data_params.c
-/home/parthpatel/.stm32cubemx/network_output/network_data.h
-/home/parthpatel/.stm32cubemx/network_output/network_data.c
+--------------------------------------------------------------------------
+C:\Users\Parth\.stm32cubemx\network_output\network_config.h
+C:\Users\Parth\.stm32cubemx\network_output\network.h
+C:\Users\Parth\.stm32cubemx\network_output\network.c
+C:\Users\Parth\.stm32cubemx\network_output\network_data_params.h
+C:\Users\Parth\.stm32cubemx\network_output\network_data_params.c
+C:\Users\Parth\.stm32cubemx\network_output\network_data.h
+C:\Users\Parth\.stm32cubemx\network_output\network_data.c

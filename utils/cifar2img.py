@@ -12,11 +12,25 @@ def unpickle(file):
 
 if __name__ == "__main__":
     # Load the dataset
-    # cifar10 = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/data_batch_1")
-    # labels = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/batches.meta")
-    cifar10 = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\test_batch")
-    labels = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\batches.meta")
+    cifar10 = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/test_batch")
+    labels = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/batches.meta")
+    # cifar10 = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\test_batch")
+    # labels = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\batches.meta")
     
+    with open("image.h", "w") as f:
+        # write image as a header file
+        img = cifar10[b'data'][0]
+        f.write('static const uint8_t image_data[] = {')
+        for i in range(3*32*32):
+            if i % 32 == 0:
+                f.write('\n')
+            f.write(f"0x{img[i]:02x}, ")
+        f.write('\n};\n')
+        
+        label = cifar10[b'labels'][0]
+        f.write(f'static const uint8_t label = {label};\n')
+
+    exit()
     num_images = 10000
     
     # print images to files
@@ -35,8 +49,8 @@ if __name__ == "__main__":
             # save image as csv
             # np.savetxt(f"{dir}/{i}.csv", img, delimiter=",", newline="")
             # skip airplanes
-            if cifar10[b'labels'][i] == 0:
-                continue
+            # if cifar10[b'labels'][i] == 0:
+            #     continue
             
             for j in range((3*32*32)-1):
                 f.write(f"{img[j]},")
@@ -47,8 +61,8 @@ if __name__ == "__main__":
     # write labels to csv
     with open("val_output.csv", "w") as f:
         for i in range(num_images):
-            if cifar10[b'labels'][i] == 0:
-                continue
+            # if cifar10[b'labels'][i] == 0:
+            #     continue
             one_hot = [0]*10
             one_hot[cifar10[b'labels'][i]] = 1
             for j in range(9):
