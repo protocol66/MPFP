@@ -48,10 +48,10 @@ class EnnClient:
     async def show_frame(self):
         while True:
             if self.frame is not None:
-                cv2.imshow('frame', self.frame)
+                cv2.imshow('Input Image', self.frame)
                 cv2.waitKey(1)
             if self.scaled_frame is not None:
-                cv2.imshow('scaled_frame', cv2.resize(self.scaled_frame,(200,200)))   # upscale for easier viewing
+                cv2.imshow('Scaled Image', cv2.resize(self.scaled_frame,(200,200)))   # upscale for easier viewing
                 cv2.waitKey(1)
             await asyncio.sleep(self.refresh_period)
 
