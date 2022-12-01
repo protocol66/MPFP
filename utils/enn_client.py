@@ -18,7 +18,7 @@ class EnnClient:
     AT_CMD_RD_IMAGE          =  "AT+IMAGE=\n"
     AT_CMD_RC_RESET          =  "AT+RESET!\n"
 
-    def __init__(self, video_device=0, refresh_period=0.5, img_out_size=(28,28), fov=0.5, **kwargs):
+    def __init__(self, video_device=0, refresh_period=0.1, img_out_size=(32,32), fov=0.5, **kwargs):
         self.video = cv2.VideoCapture(video_device)
         self.frame = None
         self.scaled_frame = None
@@ -30,7 +30,7 @@ class EnnClient:
         self.com_status = None
 
         port = kwargs.get('port', '/dev/ttyACM0')
-        baud = kwargs.get('baud', 9600)
+        baud = kwargs.get('baud', 115200)
         self.ser = serial.Serial(port, baud)
 
     async def get_frame(self):
@@ -48,10 +48,10 @@ class EnnClient:
     async def show_frame(self):
         while True:
             if self.frame is not None:
-                cv2.imshow('frame', self.frame)
+                cv2.imshow('Input Image', self.frame)
                 cv2.waitKey(1)
             if self.scaled_frame is not None:
-                cv2.imshow('scaled_frame', cv2.resize(self.scaled_frame,(200,200)))   # upscale for easier viewing
+                cv2.imshow('Scaled Image', cv2.resize(self.scaled_frame,(200,200)))   # upscale for easier viewing
                 cv2.waitKey(1)
             await asyncio.sleep(self.refresh_period)
 
@@ -65,8 +65,8 @@ class EnnClient:
             for __ in range(3):      # try 3 times, before sending reset
                 self.ser.flushInput()  # clear buffer
                 self.ser.write(self.AT_CMD_RQ_STATUS.encode())
-                await asyncio.sleep(0.1)
-                rx = self.ser.readline()
+                await asyncio.sleep(0.01)
+                rx = self.ser.read(self.ser.inWaiting())
 
                 if rx == self.AT_CMD_TS_STATUS_READY.encode():
                     self.connected = True
@@ -77,27 +77,29 @@ class EnnClient:
                     self.com_status = 'BUSY'
                     return
                 elif rx == self.AT_CMD_TS_STATUS_ERROR.encode():
+                    logging.warning('Device in error state')
                     self.connected = True
                     self.com_status = 'ERROR'
                     return
                 else:
+                    logging.debug(f'rx: invalid response{rx.decode()}')
                     self.connected = False
                     self.com_status = None
                     
             await asyncio.sleep(0.1)
             self.ser.write(self.AT_CMD_RC_RESET.encode())  # reset device
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.5)
         
         logging.error('Failed to get status from device')
         exit()
 
     async def send_frame(self):
         self.ser.write(self.AT_CMD_RD_IMAGE.encode())
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         self.ser.write(self.scaled_frame.tobytes())
 
     async def com_link(self):
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.2)
         await self._get_status()
         logging.info('Device connected')
 
@@ -105,10 +107,9 @@ class EnnClient:
             await self._get_status()
             logging.debug(f'com_status: {self.com_status}')
             if self.com_status == 'READY':
-                pass
-                # if self.scaled_frame is not None:
-                #     await self.send_frame()
-                #     logging.debug('sent frame')
+                if self.scaled_frame is not None:
+                    await self.send_frame()
+                    logging.debug('sent frame')
 
             if self.com_status == 'ERROR':
                 self.ser.write(self.AT_CMD_RC_RESET.encode())
@@ -136,6 +137,6 @@ class EnnClient:
 
 if __name__ == '__main__':
     logging.debug('Creating enn client')
-    ec = EnnClient(refresh_period=0.1)
+    ec = EnnClient()
     logging.debug('Running enn client')
     ec.run()

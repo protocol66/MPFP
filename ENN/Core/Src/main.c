@@ -21,28 +21,48 @@
 
 
 #include "lib.h"
-#include "string.h"
+#include "at_cmd.h"
+#include "seven_seg.h"
+// #include "string.h"
 #include "stdio.h"
-#include "stm32l4xx_ll_system.h"
-#include "stm32l4xx_ll_utils.h"
 
 #include "ai_datatypes_defines.h"
 #include "ai_platform.h"
 #include "network.h"
 #include "network_data.h"
-#include "image.h"
+// #include "image.h"
 
 
-#define DMA_RX_BUFFER_SIZE 100
+#define IMAGE_SIZE ((uint16_t)3*32*32)
+#define DMA_RX_BUFFER_SIZE (IMAGE_SIZE + 32)   // extra bytes just in case...
 
 void SystemClock_Config(void);
 int aiInit(void);
 int aiRun(const void*, void*);
+void data_ctrl_init(void);
+uint8_t* data_ctrl_get_img(void);
+void seven_seg_init(Seven_Seg*);
+uint8_t process_img(uint8_t*);
+
+__STATIC_INLINE
+void enable_usart_interupt(void)  {
+    LL_USART_EnableIT_RXNE(g_st_usart2.pst_usart_sel);
+    NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_SetPriority(USART2_IRQn, 0);
+}
+
+__STATIC_INLINE
+void disable_usart_interupt(void)  {
+    LL_USART_DisableIT_RXNE(g_st_usart2.pst_usart_sel);
+    NVIC_DisableIRQ(USART2_IRQn);
+}
 
 
-char rx_string[DMA_RX_BUFFER_SIZE + 1];    // string to hold the received data
-char tx_string[1001];    // string to hold the data to be sent
-uint32_t rx_len = 0;    // length of the received string
+uint8_t dma_rx_buffer_1[DMA_RX_BUFFER_SIZE + 1];   // +1 for null terminator
+uint8_t dma_rx_buffer_2[DMA_RX_BUFFER_SIZE + 1];
+uint8_t *dma_rx_active_buffer = dma_rx_buffer_1;
+bool dma_rx_buffer_ready = true;
+bool system_error = false;
 
 static ai_handle network = AI_HANDLE_NULL;
 AI_ALIGNED(4)
@@ -57,51 +77,22 @@ static ai_buffer* ai_input;
 static ai_buffer* ai_output;
 
 int main(void)  {
-    // // temporary until clock setup is working
-    // rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
-    // rcc_apb1_frequency = 4e6;
-    // rcc_apb2_frequency = 4e6;
     SystemClock_Config();  // Initialize the system clock
-
-
-    // __disable_irq();    // no interrupts needed for this homework
-
-    SETUP_USART2(9600);     // setup USART2 for printf
     crc_init();             // initialize CRC peripheral
+    __disable_irq();        
+    SETUP_USART2(57600);     // setup USART2 for printf
 
-    SETUP_LD2();
-
+    Seven_Seg seven_seg;
     aiInit();
+    data_ctrl_init();
+    seven_seg_init(&seven_seg);
+
+    __enable_irq();     // enable interrupts
     
     while (1) {
-        // copy the image data into the input buffer
-        // memcpy(in_data, image_data, AI_NETWORK_IN_1_SIZE);
-        for (int i = 0; i < AI_NETWORK_IN_1_SIZE; i++) {
-            in_data[i] = (ai_float) image_data[i];
-        }
-
-        // run the AI
-        aiRun(in_data, out_data);
-
-        // get the prediction (the index of the highest value in the output buffer)
-        int prediction = 0;
-        for (int i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-            if (out_data[i] > out_data[prediction]) {
-                prediction = i;
-            }
-        }
-        char tx_string[30];
-        sprintf(tx_string, "Prediction: %d\r\n", prediction);
-//        USART2_SEND_STRING(tx_string);
-
-        // turn on LED if the prediction is correct
-        if (prediction == (int) label) {
-            TURN_ON_LD2();
-            while (1) {}
-        } else {
-            TURN_OFF_LD2();
-        }
-
+        uint8_t *img = data_ctrl_get_img();
+        uint8_t pred = process_img(img);
+        fn_seven_seg_display(&seven_seg, pred, 1);
     }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
@@ -170,8 +161,134 @@ int aiRun(const void *in_data, void *out_data) {
     n_batch = ai_network_run(network, &ai_input[0], &ai_output[0]);
     if (n_batch != 1) {
         err = ai_network_get_error(network);
-        return -1;
+        if (err.type != AI_ERROR_NONE) {
+            return -1;
+        }
     };
 
     return 0;
+}
+
+void data_ctrl_init(void)    {
+    // setup DMA for USART2
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
+    fn_usart_enable_dma_rx(&g_st_usart2);
+
+    // enable intrupts for receiving commands
+    enable_usart_interupt();
+}
+
+
+uint8_t* data_ctrl_get_img(void) {
+
+    while(dma_rx_buffer_ready);        // wait for image to start being loaded into the buffer
+
+    uint32_t data_read = 0;
+
+    // loop till we get a full image
+    while(data_read < IMAGE_SIZE)   {
+        data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
+    }
+
+    // disable dma
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
+
+    // swap buffers
+    uint8_t * image_ready;
+    if (dma_rx_active_buffer == dma_rx_buffer_1) {
+        dma_rx_active_buffer = dma_rx_buffer_2;
+        image_ready = dma_rx_buffer_1;
+    } else {
+        dma_rx_active_buffer = dma_rx_buffer_1;
+        image_ready = dma_rx_buffer_2;
+    }
+
+    // enable dma
+    dma_rx_buffer_ready = true;
+    fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
+    fn_usart_enable_dma_rx(&g_st_usart2);
+    enable_usart_interupt();
+
+    return image_ready;
+}
+
+void seven_seg_init(Seven_Seg *seven_seg) {
+    seven_seg->a = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_1);
+    seven_seg->b = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_2);
+    seven_seg->c = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_3);
+    seven_seg->d = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_4);
+    seven_seg->e = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_5);
+    seven_seg->f = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_6);
+    seven_seg->g = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_7);
+    seven_seg->dot = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_8);
+    seven_seg->active_low = 0;
+
+    fn_seven_seg_init(seven_seg);
+    fn_seven_seg_clear(seven_seg);
+}
+
+uint8_t process_img(uint8_t* img)  {
+    // copy the image data into the input buffer
+    for (int i = 0; i < AI_NETWORK_IN_1_SIZE; i++) {
+        in_data[i] = (ai_float) img[i];
+    }
+
+    // run the AI
+    aiRun(in_data, out_data);
+
+    // get the prediction (the index of the highest value in the output buffer)
+    uint8_t prediction = 0;
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        if (out_data[i] > out_data[prediction]) {
+            prediction = i;
+        }
+    }
+    return prediction;
+}
+
+/* uart handler to catch commands*/
+void USART2_IRQHandler(void)
+{
+    uint16_t data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
+
+    if (data_read == 0)     // this should never happen, but just in case
+        return;
+
+    if (data_read >= DMA_RX_BUFFER_SIZE)    {   // dma overflow
+        system_error = true;
+        USART2_SEND_STRING(AT_CMD_TS_STATUS_ERROR);     // we dont know what they wanted so send error
+    }
+
+    if (dma_rx_active_buffer[data_read-1] != '\n')      // we are looking for the newline character as a deliniator
+        return;
+
+    dma_rx_active_buffer[data_read] = '\0';     // convert to a string
+
+    if(STRING_CHK_EQ(AT_CMD_RQ_STATUS, (char *)dma_rx_active_buffer)) {
+        if(dma_rx_buffer_ready) {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_READY);
+        } else {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_BUSY);
+        }
+    } else if (STRING_CHK_EQ(AT_CMD_RD_IMAGE, (char *)dma_rx_active_buffer)) {      // image is being sent, disable interupt because this will take a while
+        if(dma_rx_buffer_ready) {
+            dma_rx_buffer_ready = false;
+            disable_usart_interupt();
+        } else {
+            USART2_SEND_STRING(AT_CMD_TS_STATUS_BUSY);
+        }
+    }
+    else if (STRING_CHK_EQ(AT_CMD_RC_RESET, (char *)dma_rx_active_buffer)) {        // the oh sh!t button
+        NVIC_SystemReset();
+    } else {
+        USART2_SEND_STRING(AT_CMD_TS_CMD_INVALID);          // Invalid command - it doesn't speak stupid
+    }
+
+    // reset dma counter
+    fn_usart_disable_dma_rx(&g_st_usart2);
+    fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
+    fn_usart_enable_dma_rx(&g_st_usart2);
+            
 }
