@@ -12,14 +12,14 @@ def unpickle(file):
 
 if __name__ == "__main__":
     # Load the dataset
-    cifar10 = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/test_batch")
-    labels = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/batches.meta")
-    # cifar10 = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\test_batch")
-    # labels = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\batches.meta")
+    # cifar10 = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/test_batch")
+    # labels = unpickle("/home/parth/Downloads/cifar-10-python/cifar-10-batches-py/batches.meta")
+    cifar10 = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\test_batch")
+    labels = unpickle(r"C:\Users\Parth\Downloads\cifar-10-batches-py\batches.meta")
     
     with open("image.h", "w") as f:
         # write image as a header file
-        img = cifar10[b'data'][0]
+        img = cifar10[b'data'][3]
         f.write('static const uint8_t image_data[] = {')
         for i in range(3*32*32):
             if i % 32 == 0:
@@ -27,7 +27,7 @@ if __name__ == "__main__":
             f.write(f"0x{img[i]:02x}, ")
         f.write('\n};\n')
         
-        label = cifar10[b'labels'][0]
+        label = cifar10[b'labels'][3]
         f.write(f'static const uint8_t label = {label};\n')
 
     exit()
