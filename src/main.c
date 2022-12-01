@@ -84,7 +84,6 @@ uint8_t* data_ctrl_get_img(void) {
 
     // disable dma
     fn_usart_disable_dma_rx(&g_st_usart2);
-    fn_usart_reset_counter_dma_rx(&g_st_usart2, DMA_RX_BUFFER_SIZE);
 
     // swap buffers
     uint8_t * image_ready;
@@ -98,6 +97,7 @@ uint8_t* data_ctrl_get_img(void) {
 
     // enable dma
     dma_rx_buffer_ready = true;
+    USART2_CLEAR_RX_BUFFER();
     fn_setup_usart_dma_rx(&g_st_usart2, dma_rx_active_buffer, DMA_RX_BUFFER_SIZE);
     fn_usart_enable_dma_rx(&g_st_usart2);
     enable_usart_interupt();
@@ -125,7 +125,7 @@ uint8_t process_img(uint8_t* img)  {
 
     img_count = (img_count + 1) % 16;
 
-    // DELAY_MS(500);             // fake processing time
+    DELAY_MS(250);             // fake processing time (500ms for some reason...)
     return img_count;
 }
 
@@ -142,7 +142,7 @@ int main(void)  {
 
     while(1)    {
         uint8_t *img = data_ctrl_get_img();
-        uint8_t pred = process_img(img);
+        uint8_t pred = process_img(0x00);
         fn_seven_seg_display(&seven_seg, pred, 1);
 
     }
