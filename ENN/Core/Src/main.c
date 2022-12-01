@@ -77,10 +77,10 @@ static ai_buffer* ai_input;
 static ai_buffer* ai_output;
 
 int main(void)  {
-    SystemClock_Config();  // Initialize the system clock
-    crc_init();             // initialize CRC peripheral
-    __disable_irq();        
-    SETUP_USART2(57600);     // setup USART2 for printf
+    __disable_irq(); 
+    fn_system_clock_config_80MHz();  // Initialize the system clock
+    crc_init();             // initialize CRC peripheral       
+    SETUP_USART2(115200);     // setup USART2 for printf
 
     Seven_Seg seven_seg;
     aiInit();
@@ -88,7 +88,7 @@ int main(void)  {
     seven_seg_init(&seven_seg);
 
     __enable_irq();     // enable interrupts
-    
+
     while (1) {
         uint8_t *img = data_ctrl_get_img();
         uint8_t pred = process_img(img);
@@ -99,43 +99,43 @@ int main(void)  {
 }
 
 // System clock configuration
-void SystemClock_Config() {
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
-    LL_RCC_MSI_Enable();
-    while (LL_RCC_MSI_IsReady() != 1) {
-        // Wait for MSI ready
-    };
+// void SystemClock_Config() {
+//     LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
+//     LL_RCC_MSI_Enable();
+//     while (LL_RCC_MSI_IsReady() != 1) {
+//         // Wait for MSI ready
+//     };
     
-    // PLL configuration
-    // PLLCLK = MSI(4 MHz) / 1 * 40 / 2 = 80 MHz
-    uint32_t PLLM = LL_RCC_PLLM_DIV_1;
-    uint32_t PLLN = 40;
-    uint32_t PLLR = LL_RCC_PLLR_DIV_2;
-    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, PLLM, PLLN, PLLR);
-    LL_RCC_PLL_Enable();
-    LL_RCC_PLL_EnableDomain_SYS();
-    while (LL_RCC_PLL_IsReady() != 1) {
-        // Wait for PLL ready
-    };
+//     // PLL configuration
+//     // PLLCLK = MSI(4 MHz) / 1 * 40 / 2 = 80 MHz
+//     uint32_t PLLM = LL_RCC_PLLM_DIV_1;
+//     uint32_t PLLN = 40;
+//     uint32_t PLLR = LL_RCC_PLLR_DIV_2;
+//     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, PLLM, PLLN, PLLR);
+//     LL_RCC_PLL_Enable();
+//     LL_RCC_PLL_EnableDomain_SYS();
+//     while (LL_RCC_PLL_IsReady() != 1) {
+//         // Wait for PLL ready
+//     };
 
-    // Set AHB prescaler
-    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
-        // Wait for system clock switch to PLL
-    };
+//     // Set AHB prescaler
+//     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+//     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+//     while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
+//         // Wait for system clock switch to PLL
+//     };
 
-    // Set APB1 & APB2 prescaler
-    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-    LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+//     // Set APB1 & APB2 prescaler
+//     LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+//     LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
 
-    // Set systick to 1ms
-    LL_Init1msTick(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
-    // LL_Init1msTick(80000000);
-    // Update CMSIS variable
-    LL_SetSystemCoreClock(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
-    // LL_SetSystemCoreClock(80000000);
-}
+//     // Set systick to 1ms
+//     LL_Init1msTick(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
+//     // LL_Init1msTick(80000000);
+//     // Update CMSIS variable
+//     LL_SetSystemCoreClock(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
+//     // LL_SetSystemCoreClock(80000000);
+// }
 
 int aiInit() {
     ai_error err;
@@ -251,6 +251,7 @@ uint8_t process_img(uint8_t* img)  {
 /* uart handler to catch commands*/
 void USART2_IRQHandler(void)
 {
+
     uint16_t data_read = DMA_RX_BUFFER_SIZE - fn_usart_get_dma_cntr_rx(&g_st_usart2);
 
     if (data_read == 0)     // this should never happen, but just in case
