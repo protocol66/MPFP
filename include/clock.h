@@ -5,98 +5,74 @@
 #include <stm32l4xx.h>				// processor defines
 #include <stm32l4xx_ll_bus.h>		// needed for enabling clock to peripherals
 #include <stm32l4xx_ll_rcc.h>		// needed to setup clock
+#include <stm32l4xx_ll_system.h>
+#include <stm32l4xx_ll_utils.h>
+#include <stm32l4xx_ll_pwr.h>
 
 #include "common.h"
 
-/*
-*	Precondition:	None
-*	Input:			u32_frequency in Hz
-*	Output:			None
-*	Impact:			Permently changes sysclock frequency
-*
-* 	Description:
-* 		input must be interger in Mhz where 8MHz <= freq <= 80Mhz
-* 		if freq < 8Mhz the system uses MSI clock which has specific freqencies, see switch statment
-*/
-// void fn_setup_clock(uint32_t u32_freq)	{
-// 	// USE THE HSI16
-// 	rcc_osc_on(RCC_HSI16);
-// 	LL_RCC_OSC
-	
-// 	flash_prefetch_enable();
-// 	flash_set_ws(4);
-// 	flash_dcache_enable();
-// 	flash_icache_enable();
+/********************************************************************************************************************************************************
+*	This code came from https://github.com/STMicroelectronics/STM32CubeL4/tree/master/Projects/NUCLEO-L476RG/Examples_LL/USART/USART_Communication_TxRx_DMA
+********************************************************************************************************************************************************/
 
-// 	if(u32_freq >= (uint32_t)8e6)	{
-// 		uint32_t u32_PLLM = 4;
-// 		uint32_t u32_PLLN = u32_freq / (uint32_t)1e6;
-// 		rcc_set_main_pll(RCC_PLLCFGR_PLLSRC_HSI16, u32_PLLM, u32_PLLN,RCC_PLLCFGR_PLLP_DIV7, RCC_PLLCFGR_PLLQ_DIV4, RCC_PLLCFGR_PLLR_DIV4);
+/**
+  * @brief  System Clock Configuration
+  *         The system Clock is configured as follows :
+  *            System Clock source            = PLL (MSI)
+  *            SYSCLK(Hz)                     = 80000000
+  *            HCLK(Hz)                       = 80000000
+  *            AHB Prescaler                  = 1
+  *            APB1 Prescaler                 = 1
+  *            APB2 Prescaler                 = 1
+  *            MSI Frequency(Hz)              = 4000000
+  *            PLL_M                          = 1
+  *            PLL_N                          = 40
+  *            PLL_R                          = 2
+  *            Flash Latency(WS)              = 4
+  * @param  None
+  * @retval None
+  */
+void fn_system_clock_config_80MHz(void)
+{
+  /* MSI configuration and activation */
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
+  LL_RCC_MSI_Enable();
+  while(LL_RCC_MSI_IsReady() != 1) 
+  {
+  };
+  
+  /* Main PLL configuration and activation */
+  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 40, LL_RCC_PLLR_DIV_2);
+  LL_RCC_PLL_Enable();
+  LL_RCC_PLL_EnableDomain_SYS();
+  while(LL_RCC_PLL_IsReady() != 1) 
+  {
+  };
+  
+  /* Sysclk activation on the main PLL */
+  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) 
+  {
+  };
+  
+  /* Set APB1 & APB2 prescaler*/
+  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+  LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
 
-// 		rcc_osc_on(RCC_PLL);
-// 		/* either rcc_wait_for_osc_ready() or do other things */
-// 		rcc_wait_for_osc_ready(RCC_PLL);
-// 		/* Enable clocks for the ports we need */
-// 		rcc_set_sysclk_source(RCC_CFGR_SW_PLL); /* careful with the param here! */
-// 		rcc_wait_for_sysclk_status(RCC_PLL);
+  /* Set systick to 1ms in using frequency set to 80MHz */
+  /* This frequency can be calculated through LL RCC macro */
+  /* ex: __LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSIRANGE_6), 
+                                  LL_RCC_PLLM_DIV_1, 40, LL_RCC_PLLR_DIV_2)*/
+  LL_Init1msTick(80000000);
+  
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
+  LL_SetSystemCoreClock(80000000);
 
-// 	} else {
-// 		rcc_osc_off(RCC_MSI);
-
-// 		switch(u32_freq)	{
-// 			case 100000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_100KHZ);	break;
-// 			case 200000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_200KHZ);	break;
-// 			case 400000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_400KHZ);	break;
-// 			case 800000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_800KHZ);	break;
-// 			case 1000000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_1MHZ);	break;
-// 			case 2000000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_2MHZ);	break;
-// 			case 4000000:
-// 				rcc_set_msi_range(RCC_CR_MSIRANGE_4MHZ);	break;
-// 			default:
-// 				return;
-// 		}
-
-// 		rcc_osc_on(RCC_MSI);
-// 		rcc_wait_for_osc_ready(RCC_MSI);
-// 		/* Enable clocks for the ports we need */
-	
-// 		rcc_set_sysclk_source(RCC_CFGR_SW_MSI); /* careful with the param here! */
-// 		rcc_wait_for_sysclk_status(RCC_MSI);
-// 	}
-
-
-// 	/* MAGIC NUMBERS ARE EVIL */
-	// rcc_ahb_frequency = u32_freq;
-	// rcc_apb1_frequency = u32_freq;
-	// rcc_apb2_frequency = u32_freq;
-// }
-
-
-
-
-/*
-*	Precondition:	fn_setup_clock
-*	Input:			None
-*	Output:			None
-*	Impact:			changes GPIO configuration
-*
-* 	Description:
-* 		this functions enable MCO output on a GPIO pin
-*/
-// extern inline
-// void ENABLE_MCO(void)	{
-// 	RCC_CFGR |= 0x41000000;		// TODO: NEED to get rid of magic numbers
-// 	// rcc_set_mco(RCC_CFGR_MCO_SYSCLK);
-// 	rcc_periph_clock_enable(RCC_GPIOA);
-// 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO8);
-// 	gpio_set_af(GPIOA, GPIO_AF0, GPIO8);
-// }
+	rcc_ahb_frequency	= 80e6;
+	rcc_apb1_frequency	= 80e6;
+	rcc_apb2_frequency	= 80e6;
+}
 
 
 #endif

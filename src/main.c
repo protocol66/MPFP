@@ -51,13 +51,9 @@ bool system_error = false;
 
 
 void sys_init(void)    {
-    // temporary until clock setup is working
-    rcc_ahb_frequency = 4e6;		// clock defaults to 4MHz at startup
-    rcc_apb1_frequency = 4e6;
-    rcc_apb2_frequency = 4e6;
-
     __disable_irq();    // no interrupts needed for this homework
-    SETUP_USART2(57600);     // setup USART2 for printf
+    fn_system_clock_config_80MHz();
+    SETUP_USART2(115200);     // setup USART2 for printf
 }
 
 void ai_init(void)  {
@@ -125,11 +121,11 @@ void seven_seg_init(Seven_Seg *seven_seg) {
 }
 
 uint8_t process_img(uint8_t* img)  {
-    static uint8_t img_count = 0xffff;
+    static uint8_t img_count = 0xff;
 
     img_count = (img_count + 1) % 16;
 
-    DELAY_MS(500);             // fake processing time
+    // DELAY_MS(500);             // fake processing time
     return img_count;
 }
 

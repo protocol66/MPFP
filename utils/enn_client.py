@@ -30,7 +30,7 @@ class EnnClient:
         self.com_status = None
 
         port = kwargs.get('port', '/dev/ttyACM0')
-        baud = kwargs.get('baud', 57600)
+        baud = kwargs.get('baud', 115200)
         self.ser = serial.Serial(port, baud)
 
     async def get_frame(self):
@@ -65,7 +65,7 @@ class EnnClient:
             for __ in range(3):      # try 3 times, before sending reset
                 self.ser.flushInput()  # clear buffer
                 self.ser.write(self.AT_CMD_RQ_STATUS.encode())
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.01)
                 rx = self.ser.read(self.ser.inWaiting())
 
                 if rx == self.AT_CMD_TS_STATUS_READY.encode():
@@ -77,6 +77,7 @@ class EnnClient:
                     self.com_status = 'BUSY'
                     return
                 elif rx == self.AT_CMD_TS_STATUS_ERROR.encode():
+                    logging.warning('Device in error state')
                     self.connected = True
                     self.com_status = 'ERROR'
                     return
@@ -94,11 +95,11 @@ class EnnClient:
 
     async def send_frame(self):
         self.ser.write(self.AT_CMD_RD_IMAGE.encode())
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         self.ser.write(self.scaled_frame.tobytes())
 
     async def com_link(self):
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.2)
         await self._get_status()
         logging.info('Device connected')
 
@@ -109,7 +110,6 @@ class EnnClient:
                 if self.scaled_frame is not None:
                     await self.send_frame()
                     logging.debug('sent frame')
-                    await asyncio.sleep(0.1)
 
             if self.com_status == 'ERROR':
                 self.ser.write(self.AT_CMD_RC_RESET.encode())
