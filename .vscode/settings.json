@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "seven_seg.h": "c",
+        "lib.h": "c",
+        "common.h": "c",
+        "at_cmd.h": "c"
+    }
+}

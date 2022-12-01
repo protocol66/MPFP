@@ -23,9 +23,11 @@
 
 #include "lib.h"
 #include "at_cmd.h"
+#include "seven_seg.h"
 
 #define IMAGE_SIZE ((uint16_t)3*32*32)
 #define DMA_RX_BUFFER_SIZE (IMAGE_SIZE + 32)   // extra bytes just in case...
+
 
 __STATIC_INLINE
 void enable_usart_interupt(void)  {
@@ -107,22 +109,46 @@ uint8_t* data_ctrl_get_img(void) {
     return image_ready;
 }
 
-uint8_t* process_img(uint8_t* img)  {
-    DELAY_MS(400);             // fake processing time
-    return (uint8_t*) 0;
+void seven_seg_init(Seven_Seg *seven_seg) {
+    seven_seg->a = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_1);
+    seven_seg->b = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_2);
+    seven_seg->c = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_3);
+    seven_seg->d = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_4);
+    seven_seg->e = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_5);
+    seven_seg->f = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_6);
+    seven_seg->g = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_7);
+    seven_seg->dot = GPIO_OUTPUT_DEFAULT(GPIOB, LL_GPIO_PIN_8);
+    seven_seg->active_low = 0;
+
+    fn_seven_seg_init(seven_seg);
+    fn_seven_seg_clear(seven_seg);
+}
+
+uint8_t process_img(uint8_t* img)  {
+    static uint8_t img_count = 0xffff;
+
+    img_count = (img_count + 1) % 16;
+
+    DELAY_MS(500);             // fake processing time
+    return img_count;
 }
 
 
 int main(void)  {
+    Seven_Seg seven_seg;
+
     sys_init();
     ai_init();
     data_ctrl_init();
+    seven_seg_init(&seven_seg);
 
     __enable_irq();     // enable interrupts
 
     while(1)    {
         uint8_t *img = data_ctrl_get_img();
-        uint8_t *output = process_img(img);
+        uint8_t pred = process_img(img);
+        fn_seven_seg_display(&seven_seg, pred, 1);
+
     }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost

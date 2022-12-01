@@ -141,6 +141,16 @@ int READ_GPIO_PIN(const GPIO gpio)	{
 	return LL_GPIO_ReadInputPort(gpio.pst_port) & gpio.u32_pin;
 }
 
+
+__STATIC_INLINE
+void SET_GPIO_PIN_VAL(const GPIO gpio, int val)	{
+	if (val)	{
+		SET_GPIO_PIN(gpio);
+	} else {
+		CLEAR_GPIO_PIN(gpio);
+	}
+}
+
 /*
 *	Precondition:	fn_setup_clock is setup
 *	Input:			None
