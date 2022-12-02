@@ -61,8 +61,8 @@ all: main-build
 main-build: ENN.elf secondary-outputs
 
 # Tool invocations
-ENN.elf ENN.map: $(OBJS) $(USER_OBJS) C:\Users\Parth\Documents\Github\ENN\ENN\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ENN.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Parth\Documents\Github\ENN\ENN\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ENN.map" -Wl,--gc-sections -static -L../Middlewares/ST/AI/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ENN.elf ENN.map: $(OBJS) $(USER_OBJS) /home/jon/Github/ENN/ENN/STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ENN.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/jon/Github/ENN/ENN/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ENN.map" -Wl,--gc-sections -static -L../Middlewares/ST/AI/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
