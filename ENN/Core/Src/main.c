@@ -1,21 +1,13 @@
 /****************************************
-*	Author: 	Jonathan Sanderson		*
-*	Date:		FAll 2022				*
-*	License:	BSD                  	*
+*	Author: 	Jonathan Sanderson & Parth Pate
+*	Date:		FAll 2022				
+*	License:	BSD                  	
 *****************************************
 *
 *	File: 		main.c
-*	Depends: 	j_utils.h
 *	Processor: 	STM32L476xx
 *	Compiler:	arm-none-eabi gcc 7.2.1
 *	
-*	NOTES:
-*		This is the main file for assignment 2
-*		The purpose of this assignment is to demonstrate knowledge of how
-*		to configure PWM using timers on the STM32L476xx microcontroller.
-*		The assignment was given in 3 parts:  A, B, and C. These parts can be selected
-*		by uncommenting the DEFINE statements right below this comment block.
-*
 ***/
 
 
@@ -64,6 +56,7 @@ uint8_t *dma_rx_active_buffer = dma_rx_buffer_1;
 bool dma_rx_buffer_ready = true;
 bool system_error = false;
 
+// AI data structures
 static ai_handle network = AI_HANDLE_NULL;
 AI_ALIGNED(4)
 static ai_u8 activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
@@ -80,7 +73,7 @@ int main(void)  {
     __disable_irq(); 
     fn_system_clock_config_80MHz();  // Initialize the system clock
     crc_init();             // initialize CRC peripheral       
-    SETUP_USART2(115200);     // setup USART2 for printf
+    SETUP_USART2(115200);     // setup USART2 
 
     Seven_Seg seven_seg;
     aiInit();
@@ -90,53 +83,18 @@ int main(void)  {
     __enable_irq();     // enable interrupts
 
     while (1) {
+        // obtain image then process it
         uint8_t *img = data_ctrl_get_img();
         uint8_t pred = process_img(img);
+        // display prediction
         fn_seven_seg_display(&seven_seg, pred, 1);
     }
     
     return 1;   // should never get here, but if it does return 1 to indicate error, even though all is lost
 }
 
-// System clock configuration
-// void SystemClock_Config() {
-//     LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
-//     LL_RCC_MSI_Enable();
-//     while (LL_RCC_MSI_IsReady() != 1) {
-//         // Wait for MSI ready
-//     };
-    
-//     // PLL configuration
-//     // PLLCLK = MSI(4 MHz) / 1 * 40 / 2 = 80 MHz
-//     uint32_t PLLM = LL_RCC_PLLM_DIV_1;
-//     uint32_t PLLN = 40;
-//     uint32_t PLLR = LL_RCC_PLLR_DIV_2;
-//     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, PLLM, PLLN, PLLR);
-//     LL_RCC_PLL_Enable();
-//     LL_RCC_PLL_EnableDomain_SYS();
-//     while (LL_RCC_PLL_IsReady() != 1) {
-//         // Wait for PLL ready
-//     };
 
-//     // Set AHB prescaler
-//     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-//     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-//     while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
-//         // Wait for system clock switch to PLL
-//     };
-
-//     // Set APB1 & APB2 prescaler
-//     LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-//     LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
-
-//     // Set systick to 1ms
-//     LL_Init1msTick(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
-//     // LL_Init1msTick(80000000);
-//     // Update CMSIS variable
-//     LL_SetSystemCoreClock(__LL_RCC_CALC_PLLCLK_FREQ(__LL_RCC_CALC_MSI_FREQ(LL_RCC_MSIRANGESEL_RUN, LL_RCC_MSI_GetRange()), PLLM, PLLN, PLLR));
-//     // LL_SetSystemCoreClock(80000000);
-// }
-
+// Initialize neural network
 int aiInit() {
     ai_error err;
     
@@ -151,6 +109,7 @@ int aiInit() {
     return 0;
 }
 
+// Run neural network
 int aiRun(const void *in_data, void *out_data) {
     ai_i32 n_batch;
     ai_error err;
@@ -169,6 +128,7 @@ int aiRun(const void *in_data, void *out_data) {
     return 0;
 }
 
+// Initialize data control
 void data_ctrl_init(void)    {
     // setup DMA for USART2
     fn_usart_disable_dma_rx(&g_st_usart2);
@@ -179,7 +139,7 @@ void data_ctrl_init(void)    {
     enable_usart_interupt();
 }
 
-
+// Get image from data control
 uint8_t* data_ctrl_get_img(void) {
 
     while(dma_rx_buffer_ready);        // wait for image to start being loaded into the buffer
@@ -229,6 +189,7 @@ void seven_seg_init(Seven_Seg *seven_seg) {
     fn_seven_seg_clear(seven_seg);
 }
 
+// Process image
 uint8_t process_img(uint8_t* img)  {
     // copy the image data into the input buffer
     for (int i = 0; i < AI_NETWORK_IN_1_SIZE; i++) {

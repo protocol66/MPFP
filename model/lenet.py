@@ -1,3 +1,6 @@
+# LeNet CNN model
+# Author: Parth Patel
+
 import torch
 import torch.nn as nn
 import torchmetrics
